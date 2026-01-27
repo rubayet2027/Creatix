@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useRef, useEffect } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { ThemeContext } from '../theme/ThemeProvider'
 
@@ -18,6 +18,18 @@ function NavLinkItem({ to, children }) {
 export default function Navbar() {
   const { toggle, theme } = useContext(ThemeContext)
   const [open, setOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef(null)
+
+  useEffect(() => {
+    function onDoc(e) {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('click', onDoc)
+    return () => document.removeEventListener('click', onDoc)
+  }, [])
 
   return (
     <header className="backdrop-blur-sm glass fixed w-full z-30">
@@ -49,6 +61,19 @@ export default function Navbar() {
             <div className="hidden md:flex gap-2">
               <Link to="/login" className="px-4 py-2 rounded-md border text-sm">Login</Link>
               <Link to="/register" className="px-4 py-2 rounded-md bg-primary text-white text-sm">Register</Link>
+            </div>
+
+            <div className="hidden md:flex items-center gap-3">
+              <div className="relative" ref={profileRef}>
+                <button onClick={() => setProfileOpen(v => !v)} className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">A</button>
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-44 bg-[var(--card)] rounded-md shadow p-2 text-sm">
+                    <Link to="/dashboard" className="block px-2 py-1 rounded hover:bg-gray-50">Dashboard</Link>
+                    <Link to="/profile" className="block px-2 py-1 rounded hover:bg-gray-50">Profile</Link>
+                    <button className="w-full text-left px-2 py-1 rounded hover:bg-gray-50">Sign out</button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <button className="md:hidden px-2 py-1" onClick={() => setOpen(v => !v)}>

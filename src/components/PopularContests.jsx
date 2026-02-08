@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { HiArrowRight, HiSparkles } from 'react-icons/hi';
+import { HiArrowRight } from 'react-icons/hi';
+import { HiSparkles } from 'react-icons/hi2';
 import ContestCard from './ContestCard';
 
 const PopularContests = () => {
@@ -74,7 +75,7 @@ const PopularContests = () => {
   ];
 
   return (
-    <section className="py-20 lg:py-32 bg-[var(--bg-secondary)]">
+    <section className="py-20 lg:py-32 bg-(--bg-secondary)">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
@@ -83,10 +84,10 @@ const PopularContests = () => {
               <HiSparkles className="w-4 h-4 text-primary-500" />
               <span className="text-sm font-medium text-primary-600 dark:text-primary-400">Trending Now</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-(--text-primary) mb-4">
               Popular Contests
             </h2>
-            <p className="text-lg text-[var(--text-secondary)] max-w-2xl">
+            <p className="text-lg text-(--text-secondary) max-w-2xl">
               Discover the most exciting contests happening right now. Join thousands of creators competing for amazing prizes.
             </p>
           </div>
@@ -110,7 +111,7 @@ const PopularContests = () => {
         <div className="text-center mt-12">
           <Link
             to="/all-contests"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[var(--bg-primary)] text-[var(--text-primary)] font-semibold rounded-2xl border border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] hover:border-primary-300 dark:hover:border-primary-700 transition-all group"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-(--bg-primary) text-(--text-primary) font-semibold rounded-2xl border border-(--border-color) hover:bg-(--bg-tertiary) hover:border-primary-300 dark:hover:border-primary-700 transition-all group"
           >
             Explore More Contests
             <HiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { HiTrophy, HiArrowRight, HiStar, HiSparkles, HiCurrencyDollar } from 'react-icons/hi';
+import { HiArrowRight, HiStar, HiCurrencyDollar } from 'react-icons/hi';
+import { HiTrophy, HiSparkles } from 'react-icons/hi2';
 
 const WinnerShowcase = () => {
   const winners = [
@@ -38,7 +39,7 @@ const WinnerShowcase = () => {
   return (
     <section className="py-20 lg:py-32 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-secondary-900 via-primary-900/20 to-secondary-900" />
+      <div className="absolute inset-0 bg-linear-to-br from-secondary-900 via-primary-900/20 to-secondary-900" />
       
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl" />
@@ -60,21 +61,21 @@ const WinnerShowcase = () => {
         </div>
 
         {/* Winners Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-16">
           {winners.map((winner, index) => (
             <div
               key={winner.id}
-              className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 hover:border-primary-500/30 transition-all duration-300"
+              className="group relative bg-linear-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-6 sm:p-8 hover:border-primary-500/30 transition-all duration-300"
             >
               {/* Trophy Icon */}
-              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <HiTrophy className="w-6 h-6 text-white" />
+              <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <HiTrophy className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
 
               {/* Winner Info */}
               <div className="flex items-center gap-4 mb-6">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-2xl text-white font-bold">
+                  <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-primary-500 to-primary-700 flex items-center justify-center text-2xl text-white font-bold">
                     {winner.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center">
@@ -108,14 +109,14 @@ const WinnerShowcase = () => {
               </div>
 
               {/* Hover Effect */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary-500/0 to-primary-500/0 group-hover:from-primary-500/5 group-hover:to-transparent transition-all duration-300" />
+              <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-primary-500/0 to-primary-500/0 group-hover:from-primary-500/5 group-hover:to-transparent transition-all duration-300" />
             </div>
           ))}
         </div>
 
         {/* Stats Highlight */}
-        <div className="bg-gradient-to-r from-primary-600/20 via-primary-500/10 to-primary-600/20 rounded-3xl border border-primary-500/20 p-8 lg:p-12">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="bg-linear-to-r from-primary-600/20 via-primary-500/10 to-primary-600/20 rounded-3xl border border-primary-500/20 p-8 lg:p-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {[
               { icon: HiCurrencyDollar, value: '$2.5M+', label: 'Total Prizes Awarded' },
               { icon: HiTrophy, value: '5,000+', label: 'Winners Crowned' },
@@ -141,7 +142,7 @@ const WinnerShowcase = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/all-contests"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-2xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-2xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25"
             >
               Start Competing
               <HiArrowRight className="w-5 h-5" />

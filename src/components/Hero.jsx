@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { HiSearch, HiPlay, HiSparkles, HiLightningBolt, HiStar } from 'react-icons/hi';
+import { HiSearch, HiPlay, HiStar } from 'react-icons/hi';
+import { HiSparkles, HiBolt } from 'react-icons/hi2';
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -8,10 +9,10 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-secondary-900 via-secondary-800 to-primary-900">
+      <div className="absolute inset-0 bg-linear-to-br from-secondary-900 via-secondary-800 to-primary-900">
         {/* Decorative shapes */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary-600/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-secondary-950 to-transparent" />
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-primary-600/20 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-1/3 bg-linear-to-t from-secondary-950 to-transparent" />
         
         {/* Diagonal accent */}
         <div className="absolute top-0 right-0 w-2/3 h-full">
@@ -51,7 +52,7 @@ const Hero = () => {
             {/* Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
               Discover.{' '}
-              <span className="bg-gradient-to-r from-primary-400 via-purple-400 to-accent-cyan bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary-400 via-purple-400 to-accent-cyan bg-clip-text text-transparent">
                 Compete.
               </span>{' '}
               Win.
@@ -65,16 +66,18 @@ const Hero = () => {
 
             {/* Search Bar */}
             <div className="relative max-w-md mx-auto lg:mx-0 mb-8">
-              <div className="relative">
-                <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search contests by category or name..."
-                  className="w-full pl-12 pr-32 py-4 bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl text-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all">
+              <div className="relative flex flex-col sm:flex-row gap-2 sm:gap-0">
+                <div className="relative flex-1">
+                  <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search contests..."
+                    className="w-full pl-12 pr-4 sm:pr-28 py-4 bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl text-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  />
+                </div>
+                <button className="sm:absolute sm:right-2 sm:top-1/2 sm:-translate-y-1/2 px-6 py-3 sm:py-2 bg-linear-to-r from-primary-600 to-primary-700 text-white font-medium rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all">
                   Search
                 </button>
               </div>
@@ -84,9 +87,9 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
               <Link
                 to="/all-contests"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-2xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-2xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
               >
-                <HiLightningBolt className="w-5 h-5" />
+                <HiBolt className="w-5 h-5" />
                 Explore Contests
               </Link>
               <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-2xl hover:bg-white/20 transition-all">
@@ -102,7 +105,7 @@ const Hero = () => {
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 border-2 border-secondary-900 flex items-center justify-center text-xs text-white font-medium"
+                      className="w-8 h-8 rounded-full bg-linear-to-br from-primary-400 to-primary-600 border-2 border-secondary-900 flex items-center justify-center text-xs text-white font-medium"
                     >
                       {String.fromCharCode(64 + i)}
                     </div>
@@ -127,11 +130,11 @@ const Hero = () => {
           <div className="hidden lg:block relative">
             <div className="relative z-10">
               {/* Main Dashboard Card */}
-              <div className="bg-gradient-to-br from-secondary-800/80 to-secondary-900/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-6 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+              <div className="bg-linear-to-br from-secondary-800/80 to-secondary-900/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-6 transform rotate-2 hover:rotate-0 transition-transform duration-500">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary-500 to-primary-700 flex items-center justify-center">
                       <span className="text-white font-bold">C</span>
                     </div>
                     <div>
@@ -171,7 +174,7 @@ const Hero = () => {
                     {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
                       <div
                         key={i}
-                        className="flex-1 bg-gradient-to-t from-primary-600 to-primary-400 rounded-t-md"
+                        className="flex-1 bg-linear-to-t from-primary-600 to-primary-400 rounded-t-md"
                         style={{ height: `${h}%` }}
                       />
                     ))}
@@ -194,9 +197,9 @@ const Hero = () => {
               </div>
 
               {/* Floating Contest Card */}
-              <div className="absolute -bottom-8 -left-8 bg-gradient-to-br from-secondary-800 to-secondary-900 backdrop-blur-xl rounded-2xl border border-white/10 shadow-xl p-4 transform -rotate-6 hover:rotate-0 transition-transform duration-500">
+              <div className="absolute -bottom-8 -left-8 bg-linear-to-br from-secondary-800 to-secondary-900 backdrop-blur-xl rounded-2xl border border-white/10 shadow-xl p-4 transform -rotate-6 hover:rotate-0 transition-transform duration-500">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-cyan to-primary-500 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-accent-cyan to-primary-500 flex items-center justify-center">
                     <HiSparkles className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -207,7 +210,7 @@ const Hero = () => {
               </div>
 
               {/* Floating Stats Card */}
-              <div className="absolute -top-4 -right-4 bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl shadow-xl p-4 transform rotate-6 hover:rotate-0 transition-transform duration-500">
+              <div className="absolute -top-4 -right-4 bg-linear-to-br from-primary-600 to-primary-800 rounded-2xl shadow-xl p-4 transform rotate-6 hover:rotate-0 transition-transform duration-500">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-white">98%</p>
                   <p className="text-xs text-primary-200">Success Rate</p>
@@ -223,7 +226,7 @@ const Hero = () => {
         <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-            className="fill-[var(--bg-primary)]"
+            className="fill-(--bg-primary)"
           />
         </svg>
       </div>

@@ -48,7 +48,7 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary-600 to-primary-700 flex items-center justify-center">
                 <span className="text-white font-bold text-lg">C</span>
               </div>
               <span className="text-xl font-bold text-white">Creatix</span>
@@ -104,13 +104,13 @@ const Footer = () => {
                 Subscribe to get notified about new contests and winners.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="px-4 py-3 bg-secondary-800 border border-secondary-700 rounded-xl text-white placeholder-secondary-500 focus:outline-none focus:border-primary-500 w-64"
+                className="px-4 py-3 bg-secondary-800 border border-secondary-700 rounded-xl text-white placeholder-secondary-500 focus:outline-none focus:border-primary-500 w-full sm:w-64"
               />
-              <button className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all">
+              <button className="px-6 py-3 bg-linear-to-r from-primary-600 to-primary-700 text-white font-medium rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all whitespace-nowrap">
                 Subscribe
               </button>
             </div>

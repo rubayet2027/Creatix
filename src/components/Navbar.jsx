@@ -42,14 +42,14 @@ const Navbar = () => {
     `relative px-3 py-2 text-sm font-medium transition-colors duration-200 ${
       isActive
         ? 'text-primary-600 dark:text-primary-400'
-        : 'text-[var(--text-secondary)] hover:text-primary-600 dark:hover:text-primary-400'
+        : 'text-(--text-secondary) hover:text-primary-600 dark:hover:text-primary-400'
     }`;
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-[var(--bg-primary)]/95 backdrop-blur-md shadow-lg border-b border-[var(--border-color)]'
+          ? 'bg-(--bg-primary)/95 backdrop-blur-md shadow-lg border-b border-(--border-color)'
           : 'bg-transparent'
       }`}
     >
@@ -57,10 +57,10 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-shadow">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-shadow">
               <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-linear-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
               Creatix
             </span>
           </Link>
@@ -79,7 +79,7 @@ const Navbar = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+              className="p-2.5 rounded-xl bg-(--bg-secondary) hover:bg-(--bg-tertiary) transition-colors"
               aria-label="Toggle theme"
             >
               {isDark ? (
@@ -94,24 +94,24 @@ const Navbar = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setProfileDropdown(!profileDropdown)}
-                  className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+                  className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-(--bg-secondary) hover:bg-(--bg-tertiary) transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-linear-to-br from-primary-500 to-primary-700 flex items-center justify-center">
                     {user.avatar ? (
                       <img src={user.avatar} alt={user.name} className="w-full h-full rounded-lg object-cover" />
                     ) : (
                       <HiUser className="w-4 h-4 text-white" />
                     )}
                   </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)]">{user.name}</span>
-                  <HiChevronDown className={`w-4 h-4 text-[var(--text-secondary)] transition-transform ${profileDropdown ? 'rotate-180' : ''}`} />
+                  <span className="text-sm font-medium text-(--text-primary)">{user.name}</span>
+                  <HiChevronDown className={`w-4 h-4 text-(--text-secondary) transition-transform ${profileDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {profileDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-xl py-2">
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-(--bg-primary) border border-(--border-color) shadow-xl py-2">
                     <Link
                       to="/dashboard"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-(--text-secondary) hover:bg-(--bg-secondary) hover:text-(--text-primary)"
                     >
                       <HiViewGrid className="w-4 h-4" />
                       Dashboard
@@ -128,13 +128,13 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-5 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:text-primary-600 transition-colors"
+                  className="px-5 py-2.5 text-sm font-medium text-(--text-primary) hover:text-primary-600 transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
+                  className="px-5 py-2.5 text-sm font-medium text-white bg-linear-to-r from-primary-600 to-primary-700 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
                 >
                   Register
                 </Link>
@@ -146,7 +146,7 @@ const Navbar = () => {
           <div className="flex items-center gap-2 lg:hidden">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-[var(--bg-secondary)]"
+              className="p-2 rounded-lg bg-(--bg-secondary)"
               aria-label="Toggle theme"
             >
               {isDark ? (
@@ -157,13 +157,13 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg bg-[var(--bg-secondary)]"
+              className="p-2 rounded-lg bg-(--bg-secondary)"
               aria-label="Toggle menu"
             >
               {isOpen ? (
-                <HiX className="w-6 h-6 text-[var(--text-primary)]" />
+                <HiX className="w-6 h-6 text-(--text-primary)" />
               ) : (
-                <HiMenu className="w-6 h-6 text-[var(--text-primary)]" />
+                <HiMenu className="w-6 h-6 text-(--text-primary)" />
               )}
             </button>
           </div>
@@ -185,25 +185,25 @@ const Navbar = () => {
                   `px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
+                      : 'text-(--text-secondary) hover:bg-(--bg-secondary)'
                   }`
                 }
               >
                 {link.label}
               </NavLink>
             ))}
-            <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--border-color)]">
+            <div className="flex gap-2 mt-4 pt-4 border-t border-(--border-color)">
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="flex-1 px-4 py-3 text-center text-sm font-medium text-[var(--text-primary)] rounded-xl border border-[var(--border-color)] hover:bg-[var(--bg-secondary)]"
+                className="flex-1 px-4 py-3 text-center text-sm font-medium text-(--text-primary) rounded-xl border border-(--border-color) hover:bg-(--bg-secondary)"
               >
                 Login
               </Link>
               <Link
                 to="/register"
                 onClick={() => setIsOpen(false)}
-                className="flex-1 px-4 py-3 text-center text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl"
+                className="flex-1 px-4 py-3 text-center text-sm font-medium text-white bg-linear-to-r from-primary-600 to-primary-700 rounded-xl"
               >
                 Register
               </Link>

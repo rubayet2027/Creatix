@@ -1,4 +1,5 @@
-import { HiSearch, HiPencilAlt, HiTrophy, HiArrowRight } from 'react-icons/hi';
+import { HiSearch, HiPencilAlt, HiArrowRight } from 'react-icons/hi';
+import { HiTrophy } from 'react-icons/hi2';
 
 const HowItWorks = () => {
   const steps = [
@@ -52,7 +53,7 @@ const HowItWorks = () => {
   };
 
   return (
-    <section id="how-it-works" className="py-20 lg:py-32 bg-[var(--bg-primary)]">
+    <section id="how-it-works" className="py-20 lg:py-32 bg-(--bg-primary)">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -60,10 +61,10 @@ const HowItWorks = () => {
             <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
             <span className="text-sm font-medium text-primary-600 dark:text-primary-400">Simple Process</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-(--text-primary) mb-6">
             How Creatix Works
           </h2>
-          <p className="text-lg text-[var(--text-secondary)]">
+          <p className="text-lg text-(--text-secondary)">
             Getting started is easy. Follow these three simple steps to begin your creative journey 
             and compete with talented individuals worldwide.
           </p>
@@ -75,38 +76,38 @@ const HowItWorks = () => {
             <div key={step.number} className="relative group">
               {/* Connector Line */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-[var(--border-color)] to-transparent z-0">
-                  <HiArrowRight className="absolute -right-0 -top-2 w-5 h-5 text-[var(--border-color)]" />
+                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-linear-to-r from-(--border-color) to-transparent z-0">
+                  <HiArrowRight className="absolute right-0 -top-2 w-5 h-5 text-(--border-color)" />
                 </div>
               )}
 
               {/* Card */}
-              <div className="relative bg-[var(--bg-secondary)] rounded-3xl p-8 border border-[var(--border-color)] hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary-500/5 group-hover:-translate-y-1">
+              <div className="relative bg-(--bg-secondary) rounded-3xl p-8 border border-(--border-color) hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary-500/5 group-hover:-translate-y-1">
                 {/* Number Badge */}
-                <div className="absolute -top-4 -right-4 w-12 h-12 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)] flex items-center justify-center shadow-lg">
-                  <span className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+                <div className="absolute -top-4 -right-4 w-12 h-12 rounded-2xl bg-(--bg-primary) border border-(--border-color) flex items-center justify-center shadow-lg">
+                  <span className="text-lg font-bold bg-linear-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
                     {step.number}
                   </span>
                 </div>
 
                 {/* Icon */}
                 <div className={`w-16 h-16 rounded-2xl ${getBgLight(step.color)} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getGradient(step.color)} flex items-center justify-center shadow-lg`}>
+                  <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${getGradient(step.color)} flex items-center justify-center shadow-lg`}>
                     <step.icon className="w-5 h-5 text-white" />
                   </div>
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
+                <h3 className="text-xl font-bold text-(--text-primary) mb-3">
                   {step.title}
                 </h3>
-                <p className="text-[var(--text-secondary)] leading-relaxed">
+                <p className="text-(--text-secondary) leading-relaxed">
                   {step.description}
                 </p>
 
                 {/* Decorative Corner */}
                 <div className="absolute bottom-0 right-0 w-24 h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className={`absolute bottom-4 right-4 w-16 h-16 rounded-full bg-gradient-to-br ${getGradient(step.color)} opacity-10`} />
+                  <div className={`absolute bottom-4 right-4 w-16 h-16 rounded-full bg-linear-to-br ${getGradient(step.color)} opacity-10`} />
                 </div>
               </div>
             </div>
@@ -117,7 +118,7 @@ const HowItWorks = () => {
         <div className="text-center mt-16">
           <a
             href="/all-contests"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-2xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 group"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-2xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 group"
           >
             Start Competing Now
             <HiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { HiTrophy, HiUsers, HiLightningBolt, HiGlobeAlt, HiChartBar, HiStar } from 'react-icons/hi';
+import { HiUsers, HiGlobeAlt, HiChartBar, HiStar } from 'react-icons/hi';
+import { HiTrophy, HiBolt } from 'react-icons/hi2';
 
 const Stats = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -7,7 +8,7 @@ const Stats = () => {
 
   const stats = [
     {
-      icon: HiLightningBolt,
+      icon: HiBolt,
       value: 500,
       suffix: '+',
       label: 'Active Contests',
@@ -122,7 +123,7 @@ const Stats = () => {
   };
 
   return (
-    <section ref={sectionRef} className="py-20 lg:py-32 bg-[var(--bg-primary)] relative overflow-hidden">
+    <section ref={sectionRef} className="py-20 lg:py-32 bg-(--bg-primary) relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Hexagon Pattern */}
@@ -139,10 +140,10 @@ const Stats = () => {
             <HiChartBar className="w-4 h-4 text-primary-500" />
             <span className="text-sm font-medium text-primary-600 dark:text-primary-400">By the Numbers</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-(--text-primary) mb-6">
             Our Growing Community
           </h2>
-          <p className="text-lg text-[var(--text-secondary)]">
+          <p className="text-lg text-(--text-secondary)">
             Join a thriving ecosystem of creative professionals who trust Creatix to showcase their talents and win rewards.
           </p>
         </div>
@@ -154,7 +155,7 @@ const Stats = () => {
             return (
               <div
                 key={stat.label}
-                className={`group relative bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] p-8 hover:border-${stat.color}-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-${stat.color}-500/5 overflow-hidden`}
+                className="group relative bg-(--bg-secondary) rounded-3xl border border-(--border-color) p-8 hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/5 overflow-hidden"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 {/* Background Gradient */}
@@ -166,15 +167,15 @@ const Stats = () => {
                 </div>
 
                 {/* Value */}
-                <p className="text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-2">
+                <p className="text-4xl lg:text-5xl font-bold text-(--text-primary) mb-2">
                   <AnimatedCounter value={stat.value} suffix={stat.suffix} isVisible={isVisible} />
                 </p>
 
                 {/* Label */}
-                <p className="text-lg font-semibold text-[var(--text-primary)] mb-1">
+                <p className="text-lg font-semibold text-(--text-primary) mb-1">
                   {stat.label}
                 </p>
-                <p className="text-sm text-[var(--text-secondary)]">
+                <p className="text-sm text-(--text-secondary)">
                   {stat.description}
                 </p>
 
@@ -186,15 +187,15 @@ const Stats = () => {
         </div>
 
         {/* Trust Badges */}
-        <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] p-8 lg:p-12">
+        <div className="bg-(--bg-secondary) rounded-3xl border border-(--border-color) p-8 lg:p-12">
           <div className="text-center mb-8">
-            <p className="text-[var(--text-secondary)]">Trusted by creators from top companies</p>
+            <p className="text-(--text-secondary)">Trusted by creators from top companies</p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16 opacity-60">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-8">
             {['Google', 'Adobe', 'Spotify', 'Airbnb', 'Netflix', 'Slack'].map((company) => (
-              <div key={company} className="flex items-center gap-2 text-[var(--text-primary)]">
-                <HiStar className="w-5 h-5 text-primary-500" />
-                <span className="text-lg font-semibold">{company}</span>
+              <div key={company} className="flex items-center justify-center gap-2 text-(--text-primary) py-2">
+                <HiStar className="w-5 h-5 text-primary-500 shrink-0" />
+                <span className="text-base lg:text-lg font-semibold">{company}</span>
               </div>
             ))}
           </div>

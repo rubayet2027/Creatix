@@ -89,7 +89,7 @@ const Stats = () => {
   }, []);
 
   // Animated counter component
-  const AnimatedCounter = ({ value, suffix }) => {
+  const AnimatedCounter = ({ value, suffix, isVisible }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
@@ -167,7 +167,7 @@ const Stats = () => {
 
                 {/* Value */}
                 <p className="text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-2">
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} isVisible={isVisible} />
                 </p>
 
                 {/* Label */}

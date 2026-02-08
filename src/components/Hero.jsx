@@ -62,7 +62,7 @@ const Hero = () => {
       </div>
 
       <Container>
-        <div className="relative pt-32 pb-20">
+        <div className="relative pt-24 pb-32">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Content */}
             <div className="text-center lg:text-left">
@@ -207,13 +207,12 @@ const Hero = () => {
                         className="bg-white/5 rounded-xl p-3 text-center"
                       >
                         <p
-                          className={`text-lg font-bold ${
-                            stat.color === 'primary'
-                              ? 'text-primary-400'
-                              : stat.color === 'emerald'
-                                ? 'text-emerald-400'
-                                : 'text-amber-400'
-                          }`}
+                          className={`text-lg font-bold ${stat.color === 'primary'
+                            ? 'text-primary-400'
+                            : stat.color === 'emerald'
+                              ? 'text-emerald-400'
+                              : 'text-amber-400'
+                            }`}
                         >
                           {stat.value}
                         </p>

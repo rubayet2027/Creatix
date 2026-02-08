@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaDiscord } from 'react-icons/fa';
 import { HiMail, HiPhone, HiLocationMarker } from 'react-icons/hi';
+import { useState } from 'react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
 
   const footerLinks = {
     Platform: [
@@ -40,6 +42,12 @@ const Footer = () => {
     { icon: FaDiscord, href: 'https://discord.com', label: 'Discord' },
   ];
 
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    // Handle subscription logic here
+    setEmail('');
+  };
+
   return (
     <footer className="bg-secondary-900 dark:bg-secondary-950 text-secondary-300">
       {/* Main Footer */}
@@ -48,28 +56,34 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary-600 to-primary-700 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
                 <span className="text-white font-bold text-lg">C</span>
               </div>
               <span className="text-xl font-bold text-white">Creatix</span>
             </Link>
             <p className="text-secondary-400 mb-6 leading-relaxed">
-              The ultimate platform for creative contests. Discover exciting challenges, 
+              The ultimate platform for creative contests. Discover exciting challenges,
               showcase your talent, and win amazing prizes.
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <HiMail className="w-5 h-5 text-primary-500" />
+              <a
+                href="mailto:support@creatix.com"
+                className="flex items-center gap-3 text-sm hover:text-primary-400 transition-colors"
+              >
+                <HiMail className="w-5 h-5 text-primary-500 flex-shrink-0" />
                 <span>support@creatix.com</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <HiPhone className="w-5 h-5 text-primary-500" />
+              </a>
+              <a
+                href="tel:+15551234567"
+                className="flex items-center gap-3 text-sm hover:text-primary-400 transition-colors"
+              >
+                <HiPhone className="w-5 h-5 text-primary-500 flex-shrink-0" />
                 <span>+1 (555) 123-4567</span>
-              </div>
+              </a>
               <div className="flex items-center gap-3 text-sm">
-                <HiLocationMarker className="w-5 h-5 text-primary-500" />
+                <HiLocationMarker className="w-5 h-5 text-primary-500 flex-shrink-0" />
                 <span>San Francisco, CA 94102</span>
               </div>
             </div>
@@ -104,16 +118,29 @@ const Footer = () => {
                 Subscribe to get notified about new contests and winners.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <form
+              onSubmit={handleSubscribe}
+              className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto"
+            >
+              <label htmlFor="newsletter-email" className="sr-only">
+                Email address
+              </label>
               <input
+                id="newsletter-email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="px-4 py-3 bg-secondary-800 border border-secondary-700 rounded-xl text-white placeholder-secondary-500 focus:outline-none focus:border-primary-500 w-full sm:w-64"
+                required
+                className="px-4 py-3 bg-secondary-800 border border-secondary-700 rounded-xl text-white placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full sm:w-64 transition-colors"
               />
-              <button className="px-6 py-3 bg-linear-to-r from-primary-600 to-primary-700 text-white font-medium rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all whitespace-nowrap">
+              <button
+                type="submit"
+                className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all whitespace-nowrap"
+              >
                 Subscribe
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -123,23 +150,26 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <p className="text-sm text-secondary-500">
-              © {currentYear} Creatix. All rights reserved.
+              &copy; {currentYear} Creatix. All rights reserved.
             </p>
-            
+
             {/* Social Links */}
             <div className="flex items-center gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-lg bg-secondary-800 hover:bg-primary-600 flex items-center justify-center transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-4 h-4" />
-                </a>
-              ))}
+              {socialLinks.map((social) => {
+                const IconComponent = social.icon;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-lg bg-secondary-800 hover:bg-primary-600 flex items-center justify-center transition-colors"
+                    aria-label={social.label}
+                  >
+                    <IconComponent className="w-4 h-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
         </div>

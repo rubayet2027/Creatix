@@ -26,10 +26,10 @@ const ContestCard = ({ contest }) => {
   };
 
   return (
-    <div className="group relative bg-(--bg-secondary) rounded-3xl border border-(--border-color) overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/5">
+    <div className="group relative bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/5">
       {/* Featured Badge */}
       {featured && (
-        <div className="absolute top-4 left-4 z-10 flex items-center gap-1 px-3 py-1 bg-linear-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-full shadow-lg">
+        <div className="absolute top-4 left-4 z-10 flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-full shadow-lg">
           <HiStar className="w-3 h-3" />
           Featured
         </div>
@@ -37,16 +37,16 @@ const ContestCard = ({ contest }) => {
 
       {/* Image Container */}
       <div className="relative h-48 overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-linear-to-br from-primary-600/20 to-secondary-900/60"
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-secondary-900/60"
           style={{
             backgroundImage: `url(${image})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         />
-        <div className="absolute inset-0 bg-linear-to-t from-secondary-900/80 via-transparent to-transparent" />
-        
+        <div className="absolute inset-0 bg-gradient-to-t from-secondary-900/80 via-transparent to-transparent" />
+
         {/* Prize Badge */}
         <div className="absolute bottom-4 right-4 px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
           <p className="text-xs text-white/80">Prize Pool</p>
@@ -61,30 +61,30 @@ const ContestCard = ({ contest }) => {
           <span className={`px-3 py-1 text-xs font-medium rounded-full ${getCategoryColor(category)}`}>
             {category}
           </span>
-          <div className="flex items-center gap-1 text-sm text-(--text-muted)">
+          <div className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
             <HiClock className="w-4 h-4" />
             <span>{deadline}</span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold text-(--text-primary) mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
+        <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
           {title}
         </h3>
 
         {/* Description */}
-        <p className="text-(--text-secondary) text-sm leading-relaxed mb-4 line-clamp-2">
+        <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4 line-clamp-2">
           {description}
         </p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-(--border-color)">
-          <div className="flex items-center gap-2 text-sm text-(--text-secondary)">
+        <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)]">
+          <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
             <div className="flex -space-x-2">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="w-6 h-6 rounded-full bg-linear-to-br from-primary-400 to-primary-600 border-2 border-(--bg-secondary) flex items-center justify-center text-[10px] text-white font-medium"
+                  className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 border-2 border-[var(--bg-secondary)] flex items-center justify-center text-[10px] text-white font-medium"
                 >
                   {String.fromCharCode(64 + i)}
                 </div>

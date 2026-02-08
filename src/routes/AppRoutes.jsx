@@ -10,6 +10,7 @@ import ContestDetails from '../pages/ContestDetails';
 import Leaderboard from '../pages/Leaderboard';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import NotFound from '../pages/NotFound';
 
 // Dashboard Pages
 import {
@@ -140,6 +141,10 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ]);
 

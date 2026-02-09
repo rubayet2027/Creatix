@@ -11,6 +11,8 @@ import Leaderboard from '../pages/Leaderboard';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import NotFound from '../pages/NotFound';
+import About from '../pages/About';
+import Contact from '../pages/Contact';
 
 // Dashboard Pages
 import {
@@ -62,6 +64,14 @@ const router = createBrowserRouter([
             <Register />
           </PublicOnlyRoute>
         ),
+      },
+      {
+        path: 'about',
+        element: <About />,
+      },
+      {
+        path: 'contact',
+        element: <Contact />,
       },
     ],
   },

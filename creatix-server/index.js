@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
+import { createRateLimiter } from './middlewares/rateLimiter.js';
 
 // Route imports
 import authRoutes from './routes/auth.js';
@@ -16,10 +17,38 @@ import statsRoutes from './routes/stats.js';
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
+
+// Connect to MongoDB on first request (serverless compatible)
+let dbConnected = false;
+app.use(async (req, res, next) => {
+    if (!dbConnected) {
+        try {
+            await connectDB();
+            dbConnected = true;
+        } catch (error) {
+            return res.status(500).json({ message: 'Database connection failed', error: error.message });
+        }
+    }
+    next();
+});
+
+// Security middleware - set security headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+});
+
+// Rate limiting - 100 requests per minute per IP
+const apiLimiter = createRateLimiter({
+    windowMs: 60000,
+    maxRequests: 100,
+    message: 'Too many requests from this IP, please try again after a minute',
+});
 
 // Middleware
 app.use(cors({
@@ -27,6 +56,7 @@ app.use(cors({
     credentials: true,
 }));
 app.use(express.json());
+app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -71,7 +101,13 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📍 API available at http://localhost:${PORT}`);
-});
+// Only listen in non-serverless environment
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📍 API available at http://localhost:${PORT}`);
+    });
+}
+
+// Export for Vercel serverless
+export default app;

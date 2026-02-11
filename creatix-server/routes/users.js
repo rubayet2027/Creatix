@@ -156,9 +156,16 @@ router.patch('/:id/role', verifyToken, isAdmin, async (req, res) => {
             return res.status(400).json({ message: 'Invalid role' });
         }
 
+        const updateData = { role };
+        
+        // If promoting to creator, update creator status
+        if (role === 'creator') {
+            updateData.creatorStatus = 'approved';
+        }
+
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { role },
+            updateData,
             { new: true }
         ).select('-firebaseUid');
 
@@ -169,6 +176,74 @@ router.patch('/:id/role', verifyToken, isAdmin, async (req, res) => {
         res.json(user);
     } catch (error) {
         console.error('Change role error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Approve creator request (Admin only)
+router.patch('/:id/approve-creator', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.creatorStatus !== 'pending') {
+            return res.status(400).json({ message: 'No pending creator request for this user' });
+        }
+
+        user.role = 'creator';
+        user.creatorStatus = 'approved';
+        await user.save();
+
+        res.json({ 
+            message: 'Creator request approved successfully',
+            user 
+        });
+    } catch (error) {
+        console.error('Approve creator error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Reject creator request (Admin only)
+router.patch('/:id/reject-creator', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.creatorStatus !== 'pending') {
+            return res.status(400).json({ message: 'No pending creator request for this user' });
+        }
+
+        user.creatorStatus = 'rejected';
+        user.creatorRequest = false;
+        await user.save();
+
+        res.json({ 
+            message: 'Creator request rejected',
+            user 
+        });
+    } catch (error) {
+        console.error('Reject creator error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get pending creator requests (Admin only)
+router.get('/creator-requests/pending', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const users = await User.find({ creatorStatus: 'pending' })
+            .select('-firebaseUid')
+            .sort({ createdAt: -1 });
+
+        res.json({ users, total: users.length });
+    } catch (error) {
+        console.error('Get pending requests error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

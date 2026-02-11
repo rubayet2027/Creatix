@@ -35,6 +35,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    // Creator request workflow fields
+    creatorRequest: {
+        type: Boolean,
+        default: false,
+    },
+    creatorStatus: {
+        type: String,
+        enum: ['none', 'pending', 'approved', 'rejected'],
+        default: 'none',
+    },
     contestsWon: {
         type: Number,
         default: 0,
@@ -46,6 +56,10 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+// Index for faster queries
+userSchema.index({ role: 1 });
+userSchema.index({ creatorStatus: 1 });
 
 const User = mongoose.model('User', userSchema);
 

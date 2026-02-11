@@ -1,11 +1,22 @@
 // API Constants
+
+// =====================================================
+// HARDCODED ADMIN CREDENTIALS
+// This is the ONLY admin account allowed in the system
+// Email: admin@creatix.com
+// Password: Admin@123456
+// =====================================================
+export const ADMIN_EMAIL = 'admin@creatix.com';
+
 export const CONTEST_TYPES = [
-    'image',
-    'article',
-    'marketing',
-    'design',
-    'coding',
-    'other'
+    'Image Design',
+    'Article Writing',
+    'Marketing Strategy',
+    'Digital Advertisement',
+    'Gaming Review',
+    'Book Review',
+    'Business Idea',
+    'Movie Review'
 ];
 
 export const CONTEST_STATUS = {

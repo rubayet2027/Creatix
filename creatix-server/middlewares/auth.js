@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
+import { auth } from '../config/firebase.js';
 import User from '../models/User.js';
 
-// Verify JWT token
+// Verify Firebase ID token
 export const verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -11,18 +11,28 @@ export const verifyToken = async (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await User.findById(decoded.userId);
+        // Verify Firebase ID token
+        const decodedToken = await auth.verifyIdToken(token);
+
+        // Find or create user in database
+        let user = await User.findOne({ firebaseUid: decodedToken.uid });
+
         if (!user) {
-            return res.status(401).json({ message: 'User not found' });
+            // Auto-create user if doesn't exist
+            user = await User.create({
+                email: decodedToken.email,
+                name: decodedToken.name || decodedToken.email?.split('@')[0],
+                photo: decodedToken.picture || '',
+                firebaseUid: decodedToken.uid,
+            });
         }
 
         req.user = user;
         next();
     } catch (error) {
         console.error('Token verification error:', error);
-        return res.status(401).json({ message: 'Invalid token' });
+        return res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
 

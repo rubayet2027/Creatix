@@ -9,6 +9,9 @@ import userRoutes from './routes/users.js';
 import contestRoutes from './routes/contests.js';
 import submissionRoutes from './routes/submissions.js';
 import paymentRoutes from './routes/payments.js';
+import participationRoutes from './routes/participations.js';
+import leaderboardRoutes from './routes/leaderboard.js';
+import statsRoutes from './routes/stats.js';
 
 // Load environment variables
 dotenv.config();
@@ -31,6 +34,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/contests', contestRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/participations', participationRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

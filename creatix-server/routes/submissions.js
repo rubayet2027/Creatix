@@ -74,6 +74,42 @@ router.get('/contest/:contestId', verifyToken, isCreator, async (req, res) => {
     }
 });
 
+// @desc    Get single submission by ID
+// @route   GET /api/submissions/:id
+// @access  Private (Creator/Admin or submission owner)
+router.get('/:id', verifyToken, async (req, res) => {
+    try {
+        const submission = await Submission.findById(req.params.id)
+            .populate('participant', 'name email photo')
+            .populate({
+                path: 'contest',
+                select: 'name image deadline status creator prizeMoney',
+                populate: { path: 'creator', select: 'name photo' },
+            });
+
+        if (!submission) {
+            return res.status(404).json({ message: 'Submission not found' });
+        }
+
+        // Check access: submission owner, contest creator, or admin
+        const isOwner = submission.participant._id.toString() === req.user._id.toString();
+        const isContestCreator = submission.contest.creator._id.toString() === req.user._id.toString();
+        const isAdmin = req.user.role === 'admin';
+
+        if (!isOwner && !isContestCreator && !isAdmin) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        res.json({
+            success: true,
+            data: submission,
+        });
+    } catch (error) {
+        console.error('Get submission error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Declare winner (Creator only)
 router.post('/:id/declare-winner', verifyToken, isCreator, async (req, res) => {
     try {

@@ -1,49 +1,43 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
+import { auth } from '../config/firebase.js';
 import User from '../models/User.js';
 
 const router = express.Router();
 
-// Generate JWT token for a user
-router.post('/jwt', async (req, res) => {
+// Sync user data from Firebase to database (called after Firebase auth)
+router.post('/sync', async (req, res) => {
     try {
-        const { email, name, photo, firebaseUid } = req.body;
+        const { firebaseUid, email, name, photo } = req.body;
 
-        if (!email) {
-            return res.status(400).json({ message: 'Email is required' });
+        if (!firebaseUid || !email) {
+            return res.status(400).json({ message: 'Firebase UID and email are required' });
         }
 
         // Find or create user
-        let user = await User.findOne({ email });
+        let user = await User.findOne({ firebaseUid });
 
         if (!user) {
             user = await User.create({
                 email,
                 name: name || email.split('@')[0],
                 photo: photo || '',
-                firebaseUid: firebaseUid || null,
+                firebaseUid,
             });
-        } else if (firebaseUid && !user.firebaseUid) {
-            // Update firebaseUid if not set
-            user.firebaseUid = firebaseUid;
+        } else {
+            // Update user info if changed
+            user.name = name || user.name;
+            user.photo = photo || user.photo;
             await user.save();
         }
 
-        // Generate JWT
-        const token = jwt.sign(
-            { userId: user._id, email: user.email, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        res.json({ token, user });
+        res.json({ user });
     } catch (error) {
-        console.error('JWT generation error:', error);
+        console.error('User sync error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Get current user info
+// Get current user info (now uses Firebase token)
 router.get('/me', async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
@@ -53,9 +47,13 @@ router.get('/me', async (req, res) => {
         }
 
         const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await User.findById(decoded.userId);
+        // Verify Firebase token
+        const decodedToken = await auth.verifyIdToken(token);
+
+        // Get user from database
+        const user = await User.findOne({ firebaseUid: decodedToken.uid });
+
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

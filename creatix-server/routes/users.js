@@ -49,6 +49,57 @@ router.get('/leaderboard', async (req, res) => {
     }
 });
 
+// @desc    Get user statistics
+// @route   GET /api/users/:id/stats
+// @access  Public
+router.get('/:id/stats', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select(
+            'name photo contestsWon contestsParticipated createdAt'
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Calculate win rate
+        const winRate =
+            user.contestsParticipated > 0
+                ? ((user.contestsWon / user.contestsParticipated) * 100).toFixed(1)
+                : 0;
+
+        // Get recent activity (last 5 participations)
+        const Contest = (await import('../models/Contest.js')).default;
+        const recentContests = await Contest.find({
+            participants: req.params.id,
+        })
+            .select('name image deadline status winner')
+            .sort({ createdAt: -1 })
+            .limit(5);
+
+        res.json({
+            success: true,
+            data: {
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    photo: user.photo,
+                    memberSince: user.createdAt,
+                },
+                stats: {
+                    contestsWon: user.contestsWon,
+                    contestsParticipated: user.contestsParticipated,
+                    winRate: parseFloat(winRate),
+                },
+                recentContests,
+            },
+        });
+    } catch (error) {
+        console.error('Get user stats error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get user by ID
 router.get('/:id', async (req, res) => {
     try {

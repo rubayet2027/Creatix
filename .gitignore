@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase
+creatix-server/firebase-admin-sdk.json
+creatix-server/firebase-base64-clean.txt
+creatix-server/firebase-temp-base64.txt
+

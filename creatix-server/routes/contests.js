@@ -66,6 +66,70 @@ router.get('/popular', async (req, res) => {
     }
 });
 
+// @desc    Get available contest types
+// @route   GET /api/contests/types
+// @access  Public
+router.get('/types', (req, res) => {
+    const contestTypes = [
+        'Image Design',
+        'Article Writing',
+        'Marketing Strategy',
+        'Digital Advertisement',
+        'Gaming Review',
+        'Book Review',
+        'Business Idea',
+        'Movie Review',
+    ];
+
+    res.json({
+        success: true,
+        count: contestTypes.length,
+        data: contestTypes,
+    });
+});
+
+// @desc    Get contests by creator ID
+// @route   GET /api/contests/creator/:userId
+// @access  Public
+router.get('/creator/:userId', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Only show approved contests to public
+        const filter = {
+            creator: req.params.userId,
+            status: 'approved',
+        };
+
+        const contests = await Contest.find(filter)
+            .populate('creator', 'name photo')
+            .populate('winner', 'name photo')
+            .select('name image description prizeMoney participantsCount deadline status contestType')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await Contest.countDocuments(filter);
+
+        res.json({
+            success: true,
+            count: contests.length,
+            pagination: {
+                page,
+                limit,
+                total,
+                pages: Math.ceil(total / limit),
+            },
+            data: contests,
+        });
+    } catch (error) {
+        console.error('Get creator contests error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get all contests for admin
 router.get('/admin/all', verifyToken, isAdmin, async (req, res) => {
     try {

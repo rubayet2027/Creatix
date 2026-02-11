@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { HiMenu, HiX, HiSun, HiMoon, HiChevronDown, HiUser, HiLogout, HiViewGrid, HiShieldCheck, HiUserGroup, HiCog, HiPencil, HiStar, HiClock } from 'react-icons/hi';
+import { HiMenu, HiX, HiSun, HiMoon, HiChevronDown, HiUser, HiLogout, HiViewGrid, HiShieldCheck, HiUserGroup, HiCog, HiPencil, HiStar, HiClock, HiBadgeCheck } from 'react-icons/hi';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -75,7 +75,7 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
           ? 'bg-[var(--bg-primary)]/95 backdrop-blur-md shadow-lg border-b border-[var(--border-color)]'
-          : 'bg-transparent'
+          : 'bg-[var(--bg-primary)]/80 backdrop-blur-sm'
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -218,6 +218,18 @@ const Navbar = () => {
                       My Participations
                     </Link>
 
+                    {/* Apply as Creator - only show for regular users */}
+                    {dbUser.role === 'user' && dbUser.creatorStatus !== 'pending' && (
+                      <Link
+                        to="/dashboard/apply-creator"
+                        onClick={() => setProfileDropdown(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                      >
+                        <HiBadgeCheck className="w-4 h-4" />
+                        Apply as Creator
+                      </Link>
+                    )}
+
                     {/* Admin-specific links */}
                     {dbUser.role === 'admin' && (
                       <Link
@@ -266,7 +278,7 @@ const Navbar = () => {
           <div className="flex items-center gap-2 lg:hidden">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+              className="p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors shadow-sm"
               aria-label="Toggle theme"
             >
               {isDark ? (
@@ -277,7 +289,7 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+              className="p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors shadow-sm border border-[var(--border-color)]"
               aria-label="Toggle menu"
             >
               {isOpen ? (

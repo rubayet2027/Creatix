@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiUser, HiInformationCircle } from 'react-icons/hi';
+import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiUser } from 'react-icons/hi';
 import { FcGoogle } from 'react-icons/fc';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +11,6 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { register: registerForm, handleSubmit, watch, formState: { errors } } = useForm();
   const password = watch('password');
-  const applyAsCreator = watch('applyAsCreator');
   const { register: registerUser, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,19 +20,7 @@ const Register = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      // Build additional data for creator request
-      const additionalData = {};
-      if (data.applyAsCreator) {
-        additionalData.creatorRequest = true;
-      }
-      
-      await registerUser(data.name, data.email, data.password, data.photo || '', additionalData);
-      
-      // Show appropriate toast message
-      if (data.applyAsCreator) {
-        toast.success('Account created! Your creator application is pending admin approval.');
-      }
-      
+      await registerUser(data.name, data.email, data.password, data.photo || '');
       navigate(from, { replace: true });
     } catch (error) {
       // Error is handled in AuthContext with toast
@@ -199,31 +186,6 @@ const Register = () => {
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
               )}
-            </div>
-
-            {/* Apply as Creator */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-primary-50/50 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-800/20 border border-primary-200 dark:border-primary-800">
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  {...registerForm('applyAsCreator')}
-                  className="mt-1 w-4 h-4 rounded border-[var(--border-color)] text-primary-600 focus:ring-primary-500"
-                />
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-[var(--text-primary)] cursor-pointer flex items-center gap-2">
-                    Apply as Contest Creator
-                    <span className="relative group">
-                      <HiInformationCircle className="w-4 h-4 text-primary-500" />
-                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 text-xs bg-gray-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                        Creators can host contests and manage submissions. Requires admin approval.
-                      </span>
-                    </span>
-                  </label>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    Host your own contests after admin approval
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* Terms */}

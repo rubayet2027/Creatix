@@ -1,12 +1,53 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import admin from 'firebase-admin';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import User from './models/User.js';
 import Contest from './models/Contest.js';
 import { ADMIN_EMAIL, CONTEST_TYPES } from './utils/constants.js';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/creatix';
+
+// Initialize Firebase Admin SDK
+let firebaseApp = null;
+const initializeFirebase = () => {
+    if (firebaseApp) return firebaseApp;
+    
+    try {
+        let serviceAccount;
+        
+        if (process.env.FIREBASE_ADMIN_SDK_BASE64) {
+            console.log('🔧 Loading Firebase Admin SDK from environment variable');
+            const decoded = Buffer.from(process.env.FIREBASE_ADMIN_SDK_BASE64, 'base64').toString();
+            serviceAccount = JSON.parse(decoded);
+        } else {
+            console.log('🔧 Loading Firebase Admin SDK from file');
+            const serviceAccountPath = join(__dirname, 'firebase-admin-sdk.json');
+            serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+        }
+        
+        firebaseApp = admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+        
+        console.log('✅ Firebase Admin SDK initialized');
+        return firebaseApp;
+    } catch (error) {
+        console.error('❌ Firebase Admin SDK initialization failed:', error.message);
+        return null;
+    }
+};
+
+// Default password for seeded users
+const DEFAULT_PASSWORD = 'Test@123456';
+const ADMIN_PASSWORD = 'Admin@123456';
 
 // Dummy Users Data
 const dummyUsers = [
@@ -270,20 +311,83 @@ async function seedDatabase() {
         await mongoose.connect(MONGODB_URI);
         console.log('✅ Connected to MongoDB');
 
+        // Initialize Firebase
+        const firebaseInitialized = initializeFirebase();
+        const auth = firebaseInitialized ? admin.auth() : null;
+
         // Clear existing data
         console.log('🗑️  Clearing existing data...');
         await User.deleteMany({});
         await Contest.deleteMany({});
         console.log('✅ Cleared existing data');
 
+        // Helper function to create Firebase user
+        const createFirebaseUser = async (email, password, displayName, photoURL) => {
+            if (!auth) {
+                console.log(`   ⚠️  Firebase not available, skipping: ${email}`);
+                return null;
+            }
+            
+            try {
+                // Check if user already exists in Firebase
+                try {
+                    const existingUser = await auth.getUserByEmail(email);
+                    console.log(`   🔄 Firebase user exists, deleting: ${email}`);
+                    await auth.deleteUser(existingUser.uid);
+                } catch (e) {
+                    // User doesn't exist, which is fine
+                }
+                
+                // Create new Firebase user
+                const firebaseUser = await auth.createUser({
+                    email,
+                    password,
+                    displayName,
+                    photoURL: photoURL || undefined,
+                    emailVerified: true,
+                });
+                console.log(`   ✅ Firebase user created: ${email}`);
+                return firebaseUser.uid;
+            } catch (error) {
+                console.error(`   ❌ Failed to create Firebase user ${email}:`, error.message);
+                return null;
+            }
+        };
+
         // Create Admin first
         console.log('👑 Creating admin user...');
-        const admin = await User.create(adminUser);
-        console.log(`✅ Admin created: ${admin.email}`);
+        const adminFirebaseUid = await createFirebaseUser(
+            ADMIN_EMAIL,
+            ADMIN_PASSWORD,
+            adminUser.name,
+            adminUser.photo
+        );
+        
+        const adminData = {
+            ...adminUser,
+            firebaseUid: adminFirebaseUid,
+        };
+        const createdAdmin = await User.create(adminData);
+        console.log(`✅ Admin created: ${createdAdmin.email}`);
 
         // Create dummy users and creators
         console.log('👥 Creating users and creators...');
-        const createdUsers = await User.insertMany(dummyUsers);
+        const createdUsers = [];
+        
+        for (const userData of dummyUsers) {
+            const firebaseUid = await createFirebaseUser(
+                userData.email,
+                DEFAULT_PASSWORD,
+                userData.name,
+                userData.photo
+            );
+            
+            const user = await User.create({
+                ...userData,
+                firebaseUid,
+            });
+            createdUsers.push(user);
+        }
         console.log(`✅ Created ${createdUsers.length} users`);
 
         // Get creators from created users
@@ -305,10 +409,14 @@ async function seedDatabase() {
         console.log(`   - Users: ${createdUsers.filter(u => u.role === 'user').length}`);
         console.log(`   - Creators: ${creators.length}`);
         console.log(`   - Contests: ${createdContests.length}`);
-        console.log(`\n🔐 ADMIN CREDENTIALS:`);
-        console.log(`   Email: ${ADMIN_EMAIL}`);
-        console.log(`   Password: Admin@123456`);
-        console.log(`\n⚠️  Note: You must create the admin account in Firebase with these credentials.`);
+        console.log(`\n🔐 LOGIN CREDENTIALS:`);
+        console.log(`   Admin:`);
+        console.log(`      Email: ${ADMIN_EMAIL}`);
+        console.log(`      Password: ${ADMIN_PASSWORD}`);
+        console.log(`   \n   All other users:`);
+        console.log(`      Password: ${DEFAULT_PASSWORD}`);
+        console.log(`\n   Sample user emails:`);
+        createdUsers.slice(0, 3).forEach(u => console.log(`      - ${u.email}`));
         console.log('========================================\n');
 
     } catch (error) {

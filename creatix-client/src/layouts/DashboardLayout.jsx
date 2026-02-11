@@ -10,7 +10,8 @@ import {
     HiUserGroup,
     HiCog,
     HiLogout,
-    HiArrowLeft
+    HiArrowLeft,
+    HiBadgeCheck
 } from 'react-icons/hi';
 import Container from '../components/layout/Container';
 import Navbar from '../components/Navbar';
@@ -102,6 +103,19 @@ const DashboardLayout = () => {
                                         {creatorNavItems.map((item) => (
                                             <NavItem key={item.to} {...item} />
                                         ))}
+                                    </>
+                                )}
+
+                                {!isCreator && !isAdmin && (
+                                    <>
+                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3">
+                                            Become a Creator
+                                        </p>
+                                        <NavItem 
+                                            to="/dashboard/apply-creator" 
+                                            icon={HiBadgeCheck} 
+                                            label="Apply as Creator" 
+                                        />
                                     </>
                                 )}
 

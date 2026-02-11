@@ -8,3 +8,4 @@ export { default as ContestSubmissions } from './ContestSubmissions';
 export { default as EditContest } from './EditContest';
 export { default as ManageUsers } from './ManageUsers';
 export { default as ManageContests } from './ManageContests';
+export { default as ApplyAsCreator } from './ApplyAsCreator';

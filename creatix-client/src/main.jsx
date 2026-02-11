@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from './theme/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
+import { LoadingProvider } from './context/LoadingContext'
 import App from './App.jsx'
 import './index.css'
 
@@ -21,7 +22,9 @@ createRoot(document.getElementById('root')).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
-          <App />
+          <LoadingProvider>
+            <App />
+          </LoadingProvider>
           <Toaster
             position="top-right"
             toastOptions={{

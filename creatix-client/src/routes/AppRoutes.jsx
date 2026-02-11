@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { PrivateRoute, CreatorRoute, AdminRoute, PublicOnlyRoute } from '../components/PrivateRoute';
+import { HomeRoute } from '../components/HomeRoute';
 
 // Public Pages
 import Home from '../pages/Home';
@@ -26,6 +27,7 @@ import {
   EditContest,
   ManageUsers,
   ManageContests,
+  ApplyAsCreator,
 } from '../pages/dashboard';
 
 const router = createBrowserRouter([
@@ -35,7 +37,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Home />,
+        element: (
+          <HomeRoute>
+            <Home />
+          </HomeRoute>
+        ),
       },
       {
         path: 'all-contests',
@@ -103,6 +109,10 @@ const router = createBrowserRouter([
       {
         path: 'profile',
         element: <MyProfile />,
+      },
+      {
+        path: 'apply-creator',
+        element: <ApplyAsCreator />,
       },
       // Creator Dashboard Routes
       {

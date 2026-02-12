@@ -17,11 +17,18 @@ api.interceptors.request.use(
         const currentUser = auth.currentUser;
         if (currentUser) {
             try {
-                // Get fresh Firebase ID token
-                const token = await currentUser.getIdToken();
+                // Get fresh Firebase ID token (force refresh if needed)
+                const token = await currentUser.getIdToken(true);
                 config.headers.Authorization = `Bearer ${token}`;
             } catch (error) {
                 console.error('Error getting Firebase token:', error);
+                // Try without force refresh as fallback
+                try {
+                    const token = await currentUser.getIdToken();
+                    config.headers.Authorization = `Bearer ${token}`;
+                } catch (fallbackError) {
+                    console.error('Fallback token fetch failed:', fallbackError);
+                }
             }
         }
         return config;

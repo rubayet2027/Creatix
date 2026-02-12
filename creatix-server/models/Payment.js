@@ -15,14 +15,29 @@ const paymentSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    type: {
+        type: String,
+        enum: ['entry_fee', 'prize_payout', 'creator_fee', 'withdrawal'],
+        default: 'entry_fee',
+    },
     stripePaymentIntentId: {
         type: String,
-        required: true,
+        default: null,
     },
     status: {
         type: String,
-        enum: ['pending', 'succeeded', 'failed'],
+        enum: ['pending', 'succeeded', 'failed', 'refunded'],
         default: 'pending',
+    },
+    // For withdrawals
+    withdrawalMethod: {
+        type: String,
+        enum: ['stripe', 'bank_transfer'],
+        default: null,
+    },
+    withdrawalDetails: {
+        type: mongoose.Schema.Types.Mixed,
+        default: null,
     },
 }, {
     timestamps: true,

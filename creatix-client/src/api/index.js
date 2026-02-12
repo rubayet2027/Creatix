@@ -23,6 +23,7 @@ export const usersAPI = {
 // Contests API
 export const contestsAPI = {
     getAll: (params) => api.get('/contests', { params }),
+    getByTimeline: () => api.get('/contests/by-timeline'),
     getPopular: (limit = 6) => api.get('/contests/popular', { params: { limit } }),
     getById: (id) => api.get(`/contests/${id}`),
     getMyContests: () => api.get('/contests/my-contests'),

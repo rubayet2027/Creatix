@@ -19,6 +19,14 @@ const submissionSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    rank: {
+        type: Number,
+        default: null, // null means not ranked, 1, 2, 3 for top 3
+    },
+    prizeAmount: {
+        type: Number,
+        default: 0,
+    },
 }, {
     timestamps: true,
 });

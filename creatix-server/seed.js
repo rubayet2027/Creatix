@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import User from './models/User.js';
 import Contest from './models/Contest.js';
+import Submission from './models/Submission.js';
+import Payment from './models/Payment.js';
 import { ADMIN_EMAIL, CONTEST_TYPES } from './utils/constants.js';
 
 dotenv.config();
@@ -314,177 +316,322 @@ const adminUser = {
     address: 'Headquarters',
 };
 
-// Function to create dummy contests
-const createDummyContests = (creators) => {
+// Helper to get random items from array
+const getRandomItems = (arr, count) => {
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.min(count, arr.length));
+};
+
+// Function to create contests data (past, ongoing, upcoming)
+const getContestsData = (creators) => {
     const now = new Date();
+    const DAY = 24 * 60 * 60 * 1000;
     
-    return [
-        // Image Design Contests
-        {
-            name: 'Modern Logo Design Challenge',
-            image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800',
-            description: 'Design a modern, minimalist logo for a tech startup. The logo should be versatile and work well on both dark and light backgrounds.',
-            price: 15,
-            prizeMoney: 500,
-            taskInstruction: 'Create a logo that represents innovation and technology. Submit in PNG and SVG formats. Include at least 3 color variations.',
-            contestType: 'Image Design',
-            deadline: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
-            creator: creators[0]._id,
-            status: 'approved',
-            participantsCount: 12,
-        },
-        {
-            name: 'Mobile App UI Design',
-            image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800',
-            description: 'Design a beautiful and intuitive UI for a fitness tracking mobile application.',
-            price: 25,
-            prizeMoney: 1000,
-            taskInstruction: 'Design 5 main screens: Home, Workout, Progress, Profile, and Settings. Use modern design trends and ensure good UX.',
-            contestType: 'Image Design',
-            deadline: new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000), // 21 days
-            creator: creators[0]._id,
-            status: 'approved',
-            participantsCount: 8,
-        },
-        // Article Writing Contests
-        {
-            name: 'Tech Blog Writing Contest',
-            image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800',
-            description: 'Write an engaging blog post about emerging technologies that will shape the future.',
-            price: 10,
-            prizeMoney: 300,
-            taskInstruction: 'Write a 1500-2000 word article about AI, blockchain, or quantum computing. Include real-world examples and cite sources.',
-            contestType: 'Article Writing',
-            deadline: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000), // 10 days
-            creator: creators[1]._id,
-            status: 'approved',
-            participantsCount: 25,
-        },
-        {
-            name: 'Travel Story Competition',
-            image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800',
-            description: 'Share your most memorable travel experience in a compelling narrative.',
-            price: 5,
-            prizeMoney: 200,
-            taskInstruction: 'Write a 1000-1500 word travel story. Include vivid descriptions and personal insights. Original photos are a plus.',
-            contestType: 'Article Writing',
-            deadline: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
-            creator: creators[1]._id,
-            status: 'approved',
-            participantsCount: 45,
-        },
-        // Marketing Strategy Contests
-        {
-            name: 'Social Media Campaign Strategy',
-            image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
-            description: 'Develop a comprehensive social media marketing strategy for a new e-commerce brand.',
-            price: 20,
-            prizeMoney: 750,
-            taskInstruction: 'Create a 30-day social media plan including content calendar, hashtag strategy, and engagement tactics for Instagram, Twitter, and TikTok.',
-            contestType: 'Marketing Strategy',
-            deadline: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000), // 18 days
-            creator: creators[1]._id,
-            status: 'approved',
-            participantsCount: 15,
-        },
-        // Gaming Review Contests
-        {
-            name: 'Best Indie Game Review',
-            image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800',
-            description: 'Write an in-depth review of your favorite indie game from the past year.',
-            price: 8,
-            prizeMoney: 250,
-            taskInstruction: 'Review any indie game released in the last 12 months. Include gameplay analysis, graphics, story, and overall recommendation. Min 800 words.',
-            contestType: 'Gaming Review',
-            deadline: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000), // 12 days
-            creator: creators[2]._id,
-            status: 'approved',
-            participantsCount: 32,
-        },
-        {
-            name: 'Retro Gaming Championship Review',
-            image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800',
-            description: 'Review a classic retro game and explain why it still holds up today.',
-            price: 5,
-            prizeMoney: 150,
-            taskInstruction: 'Choose any game from before 2000. Discuss its historical significance, gameplay mechanics, and why modern gamers should try it.',
-            contestType: 'Gaming Review',
-            deadline: new Date(now.getTime() + 9 * 24 * 60 * 60 * 1000), // 9 days
-            creator: creators[2]._id,
-            status: 'approved',
-            participantsCount: 28,
-        },
-        // Book Review Contests
-        {
-            name: 'Fiction Book Review Challenge',
-            image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800',
-            description: 'Review a fiction book that changed your perspective on life.',
-            price: 5,
-            prizeMoney: 200,
-            taskInstruction: 'Write a thoughtful review (600-1000 words) of a fiction book. Discuss themes, character development, and personal impact.',
-            contestType: 'Book Review',
-            deadline: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000), // 15 days
-            creator: creators[1]._id,
-            status: 'approved',
-            participantsCount: 18,
-        },
-        // Business Idea Contests
-        {
-            name: 'Sustainable Business Pitch',
-            image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
-            description: 'Pitch an innovative business idea that addresses environmental sustainability.',
-            price: 30,
-            prizeMoney: 1500,
-            taskInstruction: 'Submit a business plan including problem statement, solution, target market, revenue model, and environmental impact. Max 3000 words.',
-            contestType: 'Business Idea',
-            deadline: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days
-            creator: creators[0]._id,
-            status: 'approved',
-            participantsCount: 22,
-        },
-        // Digital Advertisement Contests
-        {
-            name: 'Creative Ad Banner Design',
-            image: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800',
-            description: 'Design eye-catching digital advertisement banners for a food delivery app.',
-            price: 12,
-            prizeMoney: 400,
-            taskInstruction: 'Create ad banners in 3 sizes: 728x90, 300x250, and 160x600. Focus on appetite appeal and clear call-to-action.',
-            contestType: 'Digital Advertisement',
-            deadline: new Date(now.getTime() + 11 * 24 * 60 * 60 * 1000), // 11 days
-            creator: creators[0]._id,
-            status: 'approved',
-            participantsCount: 19,
-        },
-        // Movie Review Contests
-        {
-            name: 'Classic Cinema Review',
-            image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
-            description: 'Review a classic movie and analyze its impact on modern cinema.',
-            price: 5,
-            prizeMoney: 175,
-            taskInstruction: 'Review a movie made before 1990. Analyze cinematography, storytelling, acting, and cultural influence. 700-1200 words.',
-            contestType: 'Movie Review',
-            deadline: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000), // 8 days
-            creator: creators[2]._id,
-            status: 'approved',
-            participantsCount: 35,
-        },
-        // Pending Contest (for admin to approve)
-        {
-            name: 'AI Art Generation Challenge',
-            image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800',
-            description: 'Create stunning artwork using AI tools and your creative vision.',
-            price: 20,
-            prizeMoney: 800,
-            taskInstruction: 'Use any AI art generation tool to create a series of 5 related artworks. Include your prompts and explain your creative process.',
-            contestType: 'Image Design',
-            deadline: new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000), // 25 days
-            creator: creators[0]._id,
-            status: 'pending',
-            participantsCount: 0,
-        },
-    ];
+    return {
+        // PAST CONTESTS (completed, have winners)
+        past: [
+            {
+                name: 'Logo Design Showdown 2024',
+                image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800',
+                description: 'Design a stunning logo for our annual design competition. Winners have been announced!',
+                price: 15,
+                prizeMoney: 1000,
+                taskInstruction: 'Create a memorable logo. Submit in PNG and SVG formats.',
+                contestType: 'Image Design',
+                deadline: new Date(now.getTime() - 30 * DAY),
+                creatorIndex: 0,
+                status: 'completed',
+            },
+            {
+                name: 'Tech Article Writing Championship',
+                image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800',
+                description: 'The best tech writers competed in this prestigious writing contest.',
+                price: 10,
+                prizeMoney: 600,
+                taskInstruction: 'Write a 2000-word article about emerging technologies.',
+                contestType: 'Article Writing',
+                deadline: new Date(now.getTime() - 25 * DAY),
+                creatorIndex: 1,
+                status: 'completed',
+            },
+            {
+                name: 'Ultimate Gaming Review Challenge',
+                image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800',
+                description: 'Gamers wrote amazing reviews for the best games of the year.',
+                price: 8,
+                prizeMoney: 500,
+                taskInstruction: 'Write a comprehensive game review with pros/cons analysis.',
+                contestType: 'Gaming Review',
+                deadline: new Date(now.getTime() - 20 * DAY),
+                creatorIndex: 2,
+                status: 'completed',
+            },
+            {
+                name: 'Brand Identity Design Contest',
+                image: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800',
+                description: 'Designers created complete brand identities for startups.',
+                price: 25,
+                prizeMoney: 1500,
+                taskInstruction: 'Design logo, business card, and letterhead.',
+                contestType: 'Image Design',
+                deadline: new Date(now.getTime() - 15 * DAY),
+                creatorIndex: 0,
+                status: 'completed',
+            },
+            {
+                name: 'Travel Blog Writing Fest',
+                image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800',
+                description: 'Amazing travel stories from around the world were shared.',
+                price: 5,
+                prizeMoney: 300,
+                taskInstruction: 'Share your best travel adventure story.',
+                contestType: 'Article Writing',
+                deadline: new Date(now.getTime() - 12 * DAY),
+                creatorIndex: 1,
+                status: 'completed',
+            },
+            {
+                name: 'Business Innovation Pitch 2024',
+                image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
+                description: 'Entrepreneurs pitched groundbreaking business ideas.',
+                price: 30,
+                prizeMoney: 2000,
+                taskInstruction: 'Submit a complete business plan with financial projections.',
+                contestType: 'Business Idea',
+                deadline: new Date(now.getTime() - 10 * DAY),
+                creatorIndex: 0,
+                status: 'completed',
+            },
+            {
+                name: 'Classic Movie Review Marathon',
+                image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
+                description: 'Film enthusiasts reviewed classic cinema masterpieces.',
+                price: 5,
+                prizeMoney: 250,
+                taskInstruction: 'Review a movie from before 2000.',
+                contestType: 'Movie Review',
+                deadline: new Date(now.getTime() - 8 * DAY),
+                creatorIndex: 2,
+                status: 'completed',
+            },
+        ],
+        
+        // ONGOING CONTESTS (deadline approaching)
+        ongoing: [
+            {
+                name: 'Modern App UI Challenge',
+                image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800',
+                description: 'Design a beautiful UI for a fitness tracking app. Contest ends soon!',
+                price: 20,
+                prizeMoney: 800,
+                taskInstruction: 'Design 5 main screens with modern UI trends.',
+                contestType: 'Image Design',
+                deadline: new Date(now.getTime() + 3 * DAY),
+                creatorIndex: 0,
+                status: 'approved',
+            },
+            {
+                name: 'AI Technology Blog Contest',
+                image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800',
+                description: 'Write about the future of artificial intelligence. Deadline approaching!',
+                price: 12,
+                prizeMoney: 500,
+                taskInstruction: 'Write a 1500+ word article about AI applications.',
+                contestType: 'Article Writing',
+                deadline: new Date(now.getTime() + 5 * DAY),
+                creatorIndex: 1,
+                status: 'approved',
+            },
+            {
+                name: 'Indie Game Deep Dive Review',
+                image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800',
+                description: 'Review the best indie games of 2024. Time is running out!',
+                price: 8,
+                prizeMoney: 350,
+                taskInstruction: 'Write an in-depth review of any indie game.',
+                contestType: 'Gaming Review',
+                deadline: new Date(now.getTime() + 4 * DAY),
+                creatorIndex: 2,
+                status: 'approved',
+            },
+            {
+                name: 'Social Media Marketing Mastery',
+                image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
+                description: 'Create a winning social media strategy. Contest ending this week!',
+                price: 18,
+                prizeMoney: 700,
+                taskInstruction: 'Develop a 30-day social media campaign plan.',
+                contestType: 'Marketing Strategy',
+                deadline: new Date(now.getTime() + 6 * DAY),
+                creatorIndex: 1,
+                status: 'approved',
+            },
+            {
+                name: 'Fiction Book Review Sprint',
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800',
+                description: 'Share your thoughts on your favorite fiction book. Hurry!',
+                price: 5,
+                prizeMoney: 200,
+                taskInstruction: 'Write a thoughtful review of a fiction book.',
+                contestType: 'Book Review',
+                deadline: new Date(now.getTime() + 2 * DAY),
+                creatorIndex: 1,
+                status: 'approved',
+            },
+            {
+                name: 'Digital Banner Ad Blitz',
+                image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
+                description: 'Design eye-catching ad banners. Just 5 days left!',
+                price: 10,
+                prizeMoney: 400,
+                taskInstruction: 'Create ad banners in 3 standard sizes.',
+                contestType: 'Digital Advertisement',
+                deadline: new Date(now.getTime() + 5 * DAY),
+                creatorIndex: 0,
+                status: 'approved',
+            },
+        ],
+        
+        // UPCOMING CONTESTS (future deadline)
+        upcoming: [
+            {
+                name: 'E-commerce Website Design',
+                image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800',
+                description: 'Design a complete e-commerce website for a fashion brand.',
+                price: 30,
+                prizeMoney: 1200,
+                taskInstruction: 'Design homepage, product page, cart, and checkout screens.',
+                contestType: 'Image Design',
+                deadline: new Date(now.getTime() + 21 * DAY),
+                creatorIndex: 0,
+                status: 'approved',
+            },
+            {
+                name: 'Cryptocurrency Explainer Article',
+                image: 'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800',
+                description: 'Write an accessible guide to cryptocurrency for beginners.',
+                price: 15,
+                prizeMoney: 600,
+                taskInstruction: 'Write a beginner-friendly crypto guide, 2000+ words.',
+                contestType: 'Article Writing',
+                deadline: new Date(now.getTime() + 18 * DAY),
+                creatorIndex: 1,
+                status: 'approved',
+            },
+            {
+                name: 'RPG Game Review Tournament',
+                image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800',
+                description: 'Review your favorite RPG game from any era.',
+                price: 10,
+                prizeMoney: 450,
+                taskInstruction: 'Write a detailed RPG game review with scoring.',
+                contestType: 'Gaming Review',
+                deadline: new Date(now.getTime() + 25 * DAY),
+                creatorIndex: 2,
+                status: 'approved',
+            },
+            {
+                name: 'Startup Pitch Competition',
+                image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800',
+                description: 'Pitch your startup idea to win funding support.',
+                price: 35,
+                prizeMoney: 2500,
+                taskInstruction: 'Submit business plan, pitch deck, and financial model.',
+                contestType: 'Business Idea',
+                deadline: new Date(now.getTime() + 30 * DAY),
+                creatorIndex: 0,
+                status: 'approved',
+            },
+            {
+                name: 'Documentary Film Review',
+                image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800',
+                description: 'Review impactful documentaries that changed perspectives.',
+                price: 8,
+                prizeMoney: 300,
+                taskInstruction: 'Write an analytical review of a documentary film.',
+                contestType: 'Movie Review',
+                deadline: new Date(now.getTime() + 15 * DAY),
+                creatorIndex: 2,
+                status: 'approved',
+            },
+            {
+                name: 'Content Marketing Strategy Challenge',
+                image: 'https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800',
+                description: 'Develop a content marketing strategy for a SaaS company.',
+                price: 22,
+                prizeMoney: 900,
+                taskInstruction: 'Create a 90-day content marketing plan with KPIs.',
+                contestType: 'Marketing Strategy',
+                deadline: new Date(now.getTime() + 20 * DAY),
+                creatorIndex: 1,
+                status: 'approved',
+            },
+            {
+                name: 'Non-Fiction Book Review Challenge',
+                image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800',
+                description: 'Review influential non-fiction books that shaped industries.',
+                price: 6,
+                prizeMoney: 250,
+                taskInstruction: 'Write a review of a business or self-help book.',
+                contestType: 'Book Review',
+                deadline: new Date(now.getTime() + 12 * DAY),
+                creatorIndex: 1,
+                status: 'approved',
+            },
+            {
+                name: 'Mobile Game Icon Design',
+                image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800',
+                description: 'Design app icons for mobile games across genres.',
+                price: 12,
+                prizeMoney: 500,
+                taskInstruction: 'Design 5 app icons for different game genres.',
+                contestType: 'Image Design',
+                deadline: new Date(now.getTime() + 14 * DAY),
+                creatorIndex: 0,
+                status: 'approved',
+            },
+            {
+                name: 'Video Ad Script Writing',
+                image: 'https://images.unsplash.com/photo-1492724441997-5dc865305da7?w=800',
+                description: 'Write compelling video ad scripts for digital marketing.',
+                price: 14,
+                prizeMoney: 550,
+                taskInstruction: 'Write 3 video ad scripts: 15s, 30s, and 60s versions.',
+                contestType: 'Digital Advertisement',
+                deadline: new Date(now.getTime() + 17 * DAY),
+                creatorIndex: 0,
+                status: 'approved',
+            },
+            {
+                name: 'Strategy Game Analysis',
+                image: 'https://images.unsplash.com/photo-1493711662062-fa541f7f3d24?w=800',
+                description: 'Deep dive analysis of popular strategy games.',
+                price: 10,
+                prizeMoney: 400,
+                taskInstruction: 'Analyze game mechanics and strategy elements.',
+                contestType: 'Gaming Review',
+                deadline: new Date(now.getTime() + 22 * DAY),
+                creatorIndex: 2,
+                status: 'approved',
+            },
+        ],
+        
+        // PENDING CONTESTS (for admin to approve)
+        pending: [
+            {
+                name: 'AI Art Generation Showcase',
+                image: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=800',
+                description: 'Create stunning AI-generated artwork.',
+                price: 20,
+                prizeMoney: 800,
+                taskInstruction: 'Submit 5 AI-generated artworks with prompts.',
+                contestType: 'Image Design',
+                deadline: new Date(now.getTime() + 28 * DAY),
+                creatorIndex: 0,
+                status: 'pending',
+            },
+        ],
+    };
 };
 
 async function seedDatabase() {
@@ -501,6 +648,8 @@ async function seedDatabase() {
         console.log('🗑️  Clearing existing data...');
         await User.deleteMany({});
         await Contest.deleteMany({});
+        await Submission.deleteMany({});
+        await Payment.deleteMany({});
         console.log('✅ Cleared existing data');
 
         // Helper function to create Firebase user
@@ -548,6 +697,11 @@ async function seedDatabase() {
         const adminData = {
             ...adminUser,
             firebaseUid: adminFirebaseUid,
+            contestsWon: 0,
+            contestsParticipated: 0,
+            points: 0,
+            balance: 0,
+            totalEarnings: 0,
         };
         const createdAdmin = await User.create(adminData);
         console.log(`✅ Admin created: ${createdAdmin.email}`);
@@ -564,23 +718,209 @@ async function seedDatabase() {
                 userData.photo
             );
             
+            // Reset stats - will be calculated from actual contest data
             const user = await User.create({
                 ...userData,
                 firebaseUid,
+                contestsWon: 0,
+                contestsParticipated: 0,
+                points: 0,
+                balance: 0,
+                totalEarnings: 0,
             });
             createdUsers.push(user);
         }
         console.log(`✅ Created ${createdUsers.length} users`);
 
-        // Get creators from created users
+        // Separate users and creators
+        const regularUsers = createdUsers.filter(u => u.role === 'user');
         const creators = createdUsers.filter(u => u.role === 'creator');
-        console.log(`✅ Found ${creators.length} creators`);
+        console.log(`✅ Found ${creators.length} creators and ${regularUsers.length} regular users`);
 
-        // Create contests
+        // Get contest data
+        const contestsData = getContestsData(creators);
+
+        // Create all contests
         console.log('🏆 Creating contests...');
-        const contestsData = createDummyContests(creators);
-        const createdContests = await Contest.insertMany(contestsData);
-        console.log(`✅ Created ${createdContests.length} contests`);
+        const allContests = [];
+        
+        // Create past contests
+        for (const contestData of contestsData.past) {
+            const contest = await Contest.create({
+                ...contestData,
+                creator: creators[contestData.creatorIndex]._id,
+                participants: [],
+                winners: [],
+                prizeDistribution: { first: 50, second: 30, third: 20 },
+            });
+            allContests.push({ contest, type: 'past' });
+        }
+        console.log(`   ✅ Created ${contestsData.past.length} past contests`);
+
+        // Create ongoing contests
+        for (const contestData of contestsData.ongoing) {
+            const contest = await Contest.create({
+                ...contestData,
+                creator: creators[contestData.creatorIndex]._id,
+                participants: [],
+                prizeDistribution: { first: 50, second: 30, third: 20 },
+            });
+            allContests.push({ contest, type: 'ongoing' });
+        }
+        console.log(`   ✅ Created ${contestsData.ongoing.length} ongoing contests`);
+
+        // Create upcoming contests
+        for (const contestData of contestsData.upcoming) {
+            const contest = await Contest.create({
+                ...contestData,
+                creator: creators[contestData.creatorIndex]._id,
+                participants: [],
+                prizeDistribution: { first: 50, second: 30, third: 20 },
+            });
+            allContests.push({ contest, type: 'upcoming' });
+        }
+        console.log(`   ✅ Created ${contestsData.upcoming.length} upcoming contests`);
+
+        // Create pending contests
+        for (const contestData of contestsData.pending) {
+            const contest = await Contest.create({
+                ...contestData,
+                creator: creators[contestData.creatorIndex]._id,
+                participants: [],
+                prizeDistribution: { first: 50, second: 30, third: 20 },
+            });
+            allContests.push({ contest, type: 'pending' });
+        }
+        console.log(`   ✅ Created ${contestsData.pending.length} pending contests`);
+
+        // Add participants and submissions to past and ongoing contests
+        console.log('📝 Creating participants and submissions...');
+        const userStats = {}; // Track each user's stats
+        regularUsers.forEach(u => {
+            userStats[u._id.toString()] = {
+                participated: 0,
+                won: 0,
+                points: 0,
+                balance: 0,
+                totalEarnings: 0,
+            };
+        });
+
+        for (const { contest, type } of allContests) {
+            if (type === 'pending') continue; // Skip pending contests
+
+            // Determine number of participants (5-15 for past/ongoing, 0-5 for upcoming)
+            const minParticipants = type === 'upcoming' ? 0 : 5;
+            const maxParticipants = type === 'upcoming' ? 5 : 15;
+            const participantCount = Math.floor(Math.random() * (maxParticipants - minParticipants + 1)) + minParticipants;
+            
+            // Select random participants
+            const participants = getRandomItems(regularUsers, participantCount);
+            
+            // Update contest with participants
+            contest.participants = participants.map(p => p._id);
+            contest.participantsCount = participants.length;
+            await contest.save();
+
+            // Create submissions for each participant
+            for (const participant of participants) {
+                const submissionData = {
+                    contest: contest._id,
+                    participant: participant._id,
+                    taskSubmission: `This is my submission for ${contest.name}. I've put a lot of effort into this entry and hope it meets all the requirements. Here's my detailed work showcasing my skills and creativity for this competition.`,
+                    isWinner: false,
+                    rank: null,
+                    prizeAmount: 0,
+                };
+                
+                await Submission.create(submissionData);
+                
+                // Update user's participation count
+                userStats[participant._id.toString()].participated++;
+            }
+
+            // For past contests, declare winners
+            if (type === 'past' && participants.length >= 3) {
+                const prizeMoney = contest.prizeMoney;
+                const prizes = [
+                    Math.floor(prizeMoney * 0.5),  // 1st: 50%
+                    Math.floor(prizeMoney * 0.3),  // 2nd: 30%
+                    Math.floor(prizeMoney * 0.2),  // 3rd: 20%
+                ];
+
+                // Select top 3 winners
+                const winners = getRandomItems(participants, 3);
+                const winnersData = [];
+
+                for (let i = 0; i < 3; i++) {
+                    const winner = winners[i];
+                    const rank = i + 1;
+                    const prize = prizes[i];
+
+                    winnersData.push({
+                        user: winner._id,
+                        rank,
+                        prize,
+                        paid: true,
+                    });
+
+                    // Update the submission with rank and prize
+                    await Submission.updateOne(
+                        { contest: contest._id, participant: winner._id },
+                        { 
+                            rank, 
+                            prizeAmount: prize,
+                            isWinner: true,
+                        }
+                    );
+
+                    // Update user stats
+                    const userId = winner._id.toString();
+                    userStats[userId].won++;
+                    userStats[userId].points += 100; // 100 points per win
+                    userStats[userId].balance += prize;
+                    userStats[userId].totalEarnings += prize;
+
+                    // Create payment record
+                    await Payment.create({
+                        user: winner._id,
+                        contest: contest._id,
+                        amount: prize,
+                        type: 'prize_payout',
+                        status: 'succeeded',
+                        stripePaymentIntentId: null,
+                    });
+                }
+
+                // Update contest with winners
+                contest.winners = winnersData;
+                contest.creatorPaymentStatus = 'paid';
+                await contest.save();
+            }
+        }
+        console.log('✅ Created participants and submissions');
+
+        // Update user stats in database
+        console.log('📊 Updating user statistics...');
+        for (const user of regularUsers) {
+            const stats = userStats[user._id.toString()];
+            await User.updateOne(
+                { _id: user._id },
+                {
+                    contestsParticipated: stats.participated,
+                    contestsWon: stats.won,
+                    points: stats.points,
+                    balance: stats.balance,
+                    totalEarnings: stats.totalEarnings,
+                }
+            );
+        }
+        console.log('✅ Updated user statistics');
+
+        // Calculate totals for summary
+        const totalContests = allContests.length;
+        const submissionCount = await Submission.countDocuments();
+        const paymentCount = await Payment.countDocuments();
 
         // Summary
         console.log('\n========================================');
@@ -588,9 +928,15 @@ async function seedDatabase() {
         console.log('========================================');
         console.log(`\n📊 Summary:`);
         console.log(`   - Admin: 1 (${ADMIN_EMAIL})`);
-        console.log(`   - Users: ${createdUsers.filter(u => u.role === 'user').length}`);
+        console.log(`   - Users: ${regularUsers.length}`);
         console.log(`   - Creators: ${creators.length}`);
-        console.log(`   - Contests: ${createdContests.length}`);
+        console.log(`   - Total Contests: ${totalContests}`);
+        console.log(`     • Past (completed): ${contestsData.past.length}`);
+        console.log(`     • Ongoing: ${contestsData.ongoing.length}`);
+        console.log(`     • Upcoming: ${contestsData.upcoming.length}`);
+        console.log(`     • Pending: ${contestsData.pending.length}`);
+        console.log(`   - Submissions: ${submissionCount}`);
+        console.log(`   - Payments: ${paymentCount}`);
         console.log(`\n🔐 LOGIN CREDENTIALS:`);
         console.log(`   Admin:`);
         console.log(`      Email: ${ADMIN_EMAIL}`);
@@ -598,7 +944,9 @@ async function seedDatabase() {
         console.log(`   \n   All other users:`);
         console.log(`      Password: ${DEFAULT_PASSWORD}`);
         console.log(`\n   Sample user emails:`);
-        createdUsers.slice(0, 3).forEach(u => console.log(`      - ${u.email}`));
+        regularUsers.slice(0, 3).forEach(u => console.log(`      - ${u.email}`));
+        console.log(`\n   Creator emails:`);
+        creators.forEach(u => console.log(`      - ${u.email}`));
         console.log('========================================\n');
 
     } catch (error) {

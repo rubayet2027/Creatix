@@ -44,7 +44,7 @@ const contestSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'approved', 'rejected'],
+        enum: ['pending', 'approved', 'rejected', 'payment_pending', 'published', 'completed'],
         default: 'pending',
     },
     participantsCount: {
@@ -55,6 +55,25 @@ const contestSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }],
+    // Support for top 3 winners with prize distribution
+    winners: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        rank: {
+            type: Number,
+            enum: [1, 2, 3],
+        },
+        prize: {
+            type: Number,
+        },
+        paid: {
+            type: Boolean,
+            default: false,
+        },
+    }],
+    // Keep single winner for backwards compatibility
     winner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -63,6 +82,22 @@ const contestSchema = new mongoose.Schema({
     winnerDeclared: {
         type: Boolean,
         default: false,
+    },
+    // Prize distribution percentages (default: 50%, 30%, 20%)
+    prizeDistribution: {
+        first: { type: Number, default: 50 },
+        second: { type: Number, default: 30 },
+        third: { type: Number, default: 20 },
+    },
+    // Creator payment for prize money
+    creatorPaymentStatus: {
+        type: String,
+        enum: ['not_required', 'pending', 'requested', 'paid'],
+        default: 'not_required',
+    },
+    creatorPaymentId: {
+        type: String,
+        default: null,
     },
 }, {
     timestamps: true,

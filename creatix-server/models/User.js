@@ -57,6 +57,15 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    // Wallet balance for prize winnings
+    balance: {
+        type: Number,
+        default: 0,
+    },
+    totalEarnings: {
+        type: Number,
+        default: 0,
+    },
 }, {
     timestamps: true,
 });

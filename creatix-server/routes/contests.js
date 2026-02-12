@@ -7,29 +7,54 @@ const router = express.Router();
 // Get all approved contests (public)
 router.get('/', async (req, res) => {
     try {
-        const { type, search, page = 1, limit = 10 } = req.query;
+        const { type, search, timeline, page = 1, limit = 10 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
+        const now = new Date();
 
-        const filter = { status: 'approved' };
+        // For past contests, include 'completed' status; for others, only 'approved'
+        let filter = {};
+        
+        if (timeline === 'past') {
+            filter.$or = [
+                { status: 'completed' },
+                { status: 'approved', deadline: { $lt: now } }
+            ];
+        } else if (timeline === 'ongoing') {
+            filter.status = 'approved';
+            filter.deadline = { $gte: now, $lte: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) };
+        } else if (timeline === 'upcoming') {
+            filter.status = 'approved';
+            filter.deadline = { $gt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) };
+        } else {
+            // Default: show all approved and completed
+            filter.$or = [
+                { status: 'approved' },
+                { status: 'completed' }
+            ];
+        }
 
         if (type && type !== 'all') {
             filter.contestType = type;
         }
 
         if (search) {
-            filter.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { contestType: { $regex: search, $options: 'i' } },
-            ];
+            const searchFilter = {
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                    { contestType: { $regex: search, $options: 'i' } },
+                ],
+            };
+            // Combine with existing filter
+            filter = { $and: [filter, searchFilter] };
         }
 
         const contests = await Contest.find(filter)
             .populate('creator', 'name photo')
-            .populate('winner', 'name photo')
+            .populate('winners.user', 'name photo')
             .skip(skip)
             .limit(parseInt(limit))
-            .sort({ createdAt: -1 });
+            .sort({ deadline: timeline === 'past' ? -1 : 1 });
 
         const total = await Contest.countDocuments(filter);
 
@@ -39,11 +64,74 @@ router.get('/', async (req, res) => {
                 page: parseInt(page),
                 limit: parseInt(limit),
                 total,
-                pages: Math.ceil(total / parseInt(limit)),
+                totalPages: Math.ceil(total / parseInt(limit)),
             },
         });
     } catch (error) {
         console.error('Get contests error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get contests grouped by timeline (for All Contests page sections)
+router.get('/by-timeline', async (req, res) => {
+    try {
+        const now = new Date();
+        const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+        // Past contests (deadline passed or status is completed)
+        const pastContests = await Contest.find({
+            $or: [
+                { status: 'completed' },
+                { status: 'approved', deadline: { $lt: now } }
+            ]
+        })
+            .populate('creator', 'name photo')
+            .populate('winners.user', 'name photo')
+            .sort({ deadline: -1 })
+            .limit(6);
+
+        // Ongoing contests (deadline within 7 days)
+        const ongoingContests = await Contest.find({
+            status: 'approved',
+            deadline: { $gte: now, $lte: oneWeekFromNow }
+        })
+            .populate('creator', 'name photo')
+            .sort({ deadline: 1 })
+            .limit(6);
+
+        // Upcoming contests (deadline more than 7 days away)
+        const upcomingContests = await Contest.find({
+            status: 'approved',
+            deadline: { $gt: oneWeekFromNow }
+        })
+            .populate('creator', 'name photo')
+            .sort({ deadline: 1 })
+            .limit(6);
+
+        // Get counts for each category
+        const pastCount = await Contest.countDocuments({
+            $or: [
+                { status: 'completed' },
+                { status: 'approved', deadline: { $lt: now } }
+            ]
+        });
+        const ongoingCount = await Contest.countDocuments({
+            status: 'approved',
+            deadline: { $gte: now, $lte: oneWeekFromNow }
+        });
+        const upcomingCount = await Contest.countDocuments({
+            status: 'approved',
+            deadline: { $gt: oneWeekFromNow }
+        });
+
+        res.json({
+            past: { contests: pastContests, total: pastCount },
+            ongoing: { contests: ongoingContests, total: ongoingCount },
+            upcoming: { contests: upcomingContests, total: upcomingCount },
+        });
+    } catch (error) {
+        console.error('Get contests by timeline error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

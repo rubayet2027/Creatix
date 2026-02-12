@@ -49,6 +49,7 @@ export const paymentsAPI = {
     getMyPayments: () => api.get('/payments/my-payments'),
     getParticipated: () => api.get('/payments/participated'),
     getWinnings: () => api.get('/payments/winnings'),
+    withdraw: (amount, method) => api.post('/payments/withdraw', { amount, method }),
 };
 
 // Leaderboard API

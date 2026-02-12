@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { HiUsers, HiClock, HiArrowRight, HiStar, HiTrophy, HiCheckCircle } from 'react-icons/hi';
+import { HiUsers, HiClock, HiArrowRight, HiStar, HiCheckCircle } from 'react-icons/hi';
+import { HiTrophy } from 'react-icons/hi2';
 
 const ContestCard = ({ contest, showWinners = false }) => {
   const {

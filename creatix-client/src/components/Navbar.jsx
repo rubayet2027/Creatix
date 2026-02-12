@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { HiMenu, HiX, HiSun, HiMoon, HiChevronDown, HiUser, HiLogout, HiViewGrid, HiShieldCheck, HiUserGroup, HiCog, HiPencil, HiStar, HiClock, HiBadgeCheck } from 'react-icons/hi';
+import { HiMenu, HiX, HiSun, HiMoon, HiChevronDown, HiUser, HiLogout, HiViewGrid, HiShieldCheck, HiUserGroup, HiCog, HiPencil, HiStar, HiClock, HiBadgeCheck, HiHome, HiCollection, HiChartBar, HiInformationCircle, HiMail } from 'react-icons/hi';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [navDropdown, setNavDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { dbUser, logout, isAuthenticated, loading } = useAuth();
   const dropdownRef = useRef(null);
+  const navDropdownRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,16 +26,19 @@ const Navbar = () => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setProfileDropdown(false);
       }
+      if (navDropdownRef.current && !navDropdownRef.current.contains(event.target)) {
+        setNavDropdown(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close mobile menu on route change / resize
+  // Close dropdowns on resize to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
-        setIsOpen(false);
+        setNavDropdown(false);
       }
     };
     window.addEventListener('resize', handleResize);
@@ -43,26 +47,25 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     setProfileDropdown(false);
-    setIsOpen(false);
+    setNavDropdown(false);
     await logout();
   };
 
-  // Different nav links based on authentication state
+  // Navigation links with icons for mobile dropdown
   const publicNavLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/all-contests', label: 'All Contests' },
-    { to: '/leaderboard', label: 'Leaderboard' },
-    { to: '/about', label: 'About' },
-    { to: '/contact', label: 'Contact' },
+    { to: '/', label: 'Home', icon: HiHome },
+    { to: '/all-contests', label: 'All Contests', icon: HiCollection },
+    { to: '/leaderboard', label: 'Leaderboard', icon: HiChartBar },
+    { to: '/about', label: 'About', icon: HiInformationCircle },
+    { to: '/contact', label: 'Contact', icon: HiMail },
   ];
 
   const authenticatedNavLinks = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/all-contests', label: 'All Contests' },
-    { to: '/leaderboard', label: 'Leaderboard' },
+    { to: '/', label: 'Dashboard', icon: HiViewGrid },
+    { to: '/all-contests', label: 'All Contests', icon: HiCollection },
+    { to: '/leaderboard', label: 'Leaderboard', icon: HiChartBar },
   ];
 
-  // Use different nav links based on whether user is logged in
   const navLinks = isAuthenticated && dbUser ? authenticatedNavLinks : publicNavLinks;
 
   const navLinkClass = ({ isActive }) =>
@@ -274,8 +277,9 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button + Profile */}
           <div className="flex items-center gap-2 lg:hidden">
+            {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               className="p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors shadow-sm"
@@ -287,78 +291,159 @@ const Navbar = () => {
                 <HiMoon className="w-5 h-5 text-secondary-600" />
               )}
             </button>
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors shadow-sm border border-[var(--border-color)]"
-              aria-label="Toggle menu"
-            >
-              {isOpen ? (
-                <HiX className="w-6 h-6 text-[var(--text-primary)]" />
-              ) : (
-                <HiMenu className="w-6 h-6 text-[var(--text-primary)]" />
-              )}
-            </button>
-          </div>
-        </div>
 
-        {/* Mobile Menu */}
-        <div
-          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[500px] pb-6' : 'max-h-0'
-            }`}
-        >
-          <div className="flex flex-col gap-2 pt-4">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsOpen(false)}
-                className={({ isActive }) =>
-                  `px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive
-                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
-                  }`
-                }
+            {/* Mobile Profile Button - Always visible when authenticated */}
+            {loading ? (
+              <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] animate-pulse" />
+            ) : isAuthenticated && dbUser ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setProfileDropdown(!profileDropdown)}
+                  className="flex items-center gap-1 p-1.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-color)]"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center overflow-hidden">
+                    {dbUser.photo ? (
+                      <img
+                        src={dbUser.photo}
+                        alt={dbUser.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <HiUser className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+                  <HiChevronDown
+                    className={`w-4 h-4 text-[var(--text-secondary)] transition-transform duration-200 ${profileDropdown ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {/* Mobile Profile Dropdown */}
+                {profileDropdown && (
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-xl py-2 z-50">
+                    {/* User Info */}
+                    <div className="px-4 py-3 border-b border-[var(--border-color)]">
+                      <p className="text-sm font-medium text-[var(--text-primary)]">{dbUser.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        {dbUser.role === 'admin' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 dark:bg-red-900/20 text-red-600 text-xs font-medium rounded-full">
+                            <HiShieldCheck className="w-3 h-3" />
+                            Admin
+                          </span>
+                        )}
+                        {dbUser.role === 'creator' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/20 text-purple-600 text-xs font-medium rounded-full">
+                            <HiUserGroup className="w-3 h-3" />
+                            Creator
+                          </span>
+                        )}
+                        {dbUser.role === 'user' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-600 text-xs font-medium rounded-full">
+                            <HiUser className="w-3 h-3" />
+                            User
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setProfileDropdown(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    >
+                      <HiViewGrid className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/dashboard/profile"
+                      onClick={() => setProfileDropdown(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    >
+                      <HiCog className="w-4 h-4" />
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/dashboard/participated"
+                      onClick={() => setProfileDropdown(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    >
+                      <HiStar className="w-4 h-4" />
+                      My Participations
+                    </Link>
+
+                    <div className="my-1 border-t border-[var(--border-color)]" />
+
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <HiLogout className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors"
               >
-                {link.label}
-              </NavLink>
-            ))}
+                Login
+              </Link>
+            )}
 
-            <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--border-color)]">
-              {isAuthenticated && dbUser ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setIsOpen(false)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-[var(--text-primary)] rounded-xl border border-[var(--border-color)] hover:bg-[var(--bg-secondary)] transition-colors"
-                  >
-                    <HiViewGrid className="w-4 h-4" />
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-red-500 rounded-xl border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    <HiLogout className="w-4 h-4" />
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="flex-1 px-4 py-3 text-center text-sm font-medium text-[var(--text-primary)] rounded-xl border border-[var(--border-color)] hover:bg-[var(--bg-secondary)] transition-colors"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setIsOpen(false)}
-                    className="flex-1 px-4 py-3 text-center text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-colors"
-                  >
-                    Register
-                  </Link>
-                </>
+            {/* Navigation Dropdown */}
+            <div className="relative" ref={navDropdownRef}>
+              <button
+                onClick={() => setNavDropdown(!navDropdown)}
+                className="p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors shadow-sm border border-[var(--border-color)]"
+                aria-label="Navigation menu"
+              >
+                {navDropdown ? (
+                  <HiX className="w-5 h-5 text-[var(--text-primary)]" />
+                ) : (
+                  <HiMenu className="w-5 h-5 text-[var(--text-primary)]" />
+                )}
+              </button>
+
+              {/* Navigation Dropdown Menu */}
+              {navDropdown && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-xl py-2 z-50">
+                  {navLinks.map((link) => {
+                    const Icon = link.icon;
+                    return (
+                      <NavLink
+                        key={link.to}
+                        to={link.to}
+                        onClick={() => setNavDropdown(false)}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                            isActive
+                              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
+                          }`
+                        }
+                      >
+                        <Icon className="w-4 h-4" />
+                        {link.label}
+                      </NavLink>
+                    );
+                  })}
+
+                  {!isAuthenticated && (
+                    <>
+                      <div className="my-1 border-t border-[var(--border-color)]" />
+                      <Link
+                        to="/register"
+                        onClick={() => setNavDropdown(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                      >
+                        <HiUser className="w-4 h-4" />
+                        Create Account
+                      </Link>
+                    </>
+                  )}
+                </div>
               )}
             </div>
           </div>

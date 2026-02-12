@@ -5,7 +5,8 @@ import { contestsAPI } from '../api';
 import ContestCard from '../components/ContestCard';
 import Container from '../components/layout/Container';
 import Section from '../components/layout/Section';
-import { HiSearch, HiFilter, HiClock, HiPlay, HiCalendar, HiCheckCircle, HiTrophy } from 'react-icons/hi';
+import { HiSearch, HiFilter, HiClock, HiPlay, HiCalendar, HiCheckCircle } from 'react-icons/hi';
+import { HiTrophy } from 'react-icons/hi2';
 
 const CONTEST_TYPES = [
   'All',

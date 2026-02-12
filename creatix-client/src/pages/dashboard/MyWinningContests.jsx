@@ -1,10 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { paymentsAPI } from '../../api';
-import { HiStar, HiCash, HiCalendar } from 'react-icons/hi';
+import { HiStar, HiCash, HiCalendar, HiCreditCard, HiCurrencyDollar, HiX } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const MyWinningContests = () => {
-    const { data: contests = [], isLoading } = useQuery({
+    const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState('');
+    const queryClient = useQueryClient();
+
+    const { data, isLoading } = useQuery({
         queryKey: ['winning-contests'],
         queryFn: async () => {
             const response = await paymentsAPI.getWinnings();
@@ -12,7 +18,40 @@ const MyWinningContests = () => {
         },
     });
 
-    const totalPrize = contests.reduce((sum, c) => sum + (c.prizeMoney || 0), 0);
+    const winnings = data?.winnings || [];
+    const summary = data?.summary || { totalWinnings: 0, balance: 0, totalEarnings: 0, contestsWon: 0 };
+
+    const withdrawMutation = useMutation({
+        mutationFn: ({ amount, method }) => paymentsAPI.withdraw(amount, method),
+        onSuccess: (response) => {
+            toast.success('Withdrawal request submitted!');
+            setShowWithdrawModal(false);
+            queryClient.invalidateQueries(['winning-contests']);
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Withdrawal failed');
+        },
+    });
+
+    const handleWithdraw = () => {
+        const amount = parseFloat(withdrawAmount);
+        if (isNaN(amount) || amount < 10) {
+            toast.error('Minimum withdrawal is $10');
+            return;
+        }
+        if (amount > summary.balance) {
+            toast.error('Insufficient balance');
+            return;
+        }
+        withdrawMutation.mutate({ amount, method: 'stripe' });
+    };
+
+    const getRankBadge = (rank) => {
+        if (rank === 1) return { icon: '🥇', text: '1st Place', color: 'bg-amber-500' };
+        if (rank === 2) return { icon: '🥈', text: '2nd Place', color: 'bg-gray-400' };
+        if (rank === 3) return { icon: '🥉', text: '3rd Place', color: 'bg-orange-500' };
+        return { icon: '🏆', text: 'Winner', color: 'bg-amber-500' };
+    };
 
     if (isLoading) {
         return (
@@ -25,27 +64,55 @@ const MyWinningContests = () => {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-[var(--text-primary)]">My Winning Contests</h1>
+                <h1 className="text-2xl font-bold text-[var(--text-primary)]">My Winnings</h1>
                 <span className="px-4 py-2 bg-amber-100 dark:bg-amber-900/20 text-amber-600 rounded-lg text-sm font-medium flex items-center gap-2">
                     <HiStar className="w-4 h-4" />
-                    {contests.length} Win{contests.length !== 1 ? 's' : ''}
+                    {summary.contestsWon} Win{summary.contestsWon !== 1 ? 's' : ''}
                 </span>
             </div>
 
-            {/* Total Earnings Card */}
-            <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-8 text-white">
-                <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                        <HiCash className="w-8 h-8" />
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <HiCash className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="text-emerald-100 text-sm font-medium">Total Earnings</p>
+                            <p className="text-3xl font-bold">${summary.totalEarnings.toLocaleString()}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-amber-100 text-sm font-medium">Total Prize Money Won</p>
-                        <p className="text-4xl font-bold">${totalPrize.toLocaleString()}</p>
+                </div>
+                
+                <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <HiCurrencyDollar className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="text-amber-100 text-sm font-medium">Available Balance</p>
+                            <p className="text-3xl font-bold">${summary.balance.toLocaleString()}</p>
+                        </div>
                     </div>
+                </div>
+
+                <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-6 flex flex-col justify-center">
+                    <button
+                        onClick={() => setShowWithdrawModal(true)}
+                        disabled={summary.balance < 10}
+                        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <HiCreditCard className="w-5 h-5" />
+                        Withdraw Funds
+                    </button>
+                    <p className="text-xs text-[var(--text-secondary)] text-center mt-2">
+                        Minimum withdrawal: $10
+                    </p>
                 </div>
             </div>
 
-            {contests.length === 0 ? (
+            {winnings.length === 0 ? (
                 <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-12 text-center">
                     <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <HiStar className="w-8 h-8 text-amber-500" />
@@ -61,55 +128,127 @@ const MyWinningContests = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {contests.map((contest) => (
-                        <div
-                            key={contest._id}
-                            className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] overflow-hidden"
-                        >
-                            <div className="relative h-40">
-                                <img
-                                    src={contest.image}
-                                    alt={contest.name}
-                                    className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                <div className="absolute bottom-4 left-4 right-4">
-                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500 text-white text-sm font-medium rounded-full mb-2">
-                                        <HiStar className="w-4 h-4" />
-                                        Winner
-                                    </span>
-                                    <h3 className="text-white font-semibold text-lg">{contest.name}</h3>
+                    {winnings.map((winning) => {
+                        const rankBadge = getRankBadge(winning.rank);
+                        const contest = winning.contest;
+                        
+                        return (
+                            <div
+                                key={winning._id}
+                                className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] overflow-hidden"
+                            >
+                                <div className="relative h-40">
+                                    <img
+                                        src={contest?.image || 'https://via.placeholder.com/400x200'}
+                                        alt={contest?.name || 'Contest'}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                    <div className="absolute bottom-4 left-4 right-4">
+                                        <span className={`inline-flex items-center gap-1 px-3 py-1 ${rankBadge.color} text-white text-sm font-medium rounded-full mb-2`}>
+                                            <span>{rankBadge.icon}</span>
+                                            {rankBadge.text}
+                                        </span>
+                                        <h3 className="text-white font-semibold text-lg">{contest?.name || 'Contest'}</h3>
+                                    </div>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                                            <HiCalendar className="w-4 h-4" />
+                                            <span className="text-sm">
+                                                {new Date(winning.createdAt).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric',
+                                                })}
+                                            </span>
+                                        </div>
+                                        <span className="text-sm text-[var(--text-secondary)]">{contest?.contestType}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)]">
+                                        <div>
+                                            <p className="text-sm text-[var(--text-secondary)]">Prize Won</p>
+                                            <p className="text-2xl font-bold text-emerald-500">${winning.prizeAmount?.toLocaleString() || 0}</p>
+                                        </div>
+                                        {contest && (
+                                            <Link
+                                                to={`/contest/${contest._id}`}
+                                                className="px-4 py-2 bg-primary-100 dark:bg-primary-900/20 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-200 dark:hover:bg-primary-900/40 transition-colors"
+                                            >
+                                                View Details
+                                            </Link>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                            <div className="p-6 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-                                        <HiCalendar className="w-4 h-4" />
-                                        <span className="text-sm">
-                                            {new Date(contest.deadline).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                            })}
-                                        </span>
-                                    </div>
-                                    <span className="text-sm text-[var(--text-secondary)]">{contest.contestType}</span>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Withdraw Modal */}
+            {showWithdrawModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-[var(--bg-primary)] rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-[var(--text-primary)]">Withdraw Funds</h2>
+                            <button
+                                onClick={() => setShowWithdrawModal(false)}
+                                className="p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors"
+                            >
+                                <HiX className="w-5 h-5 text-[var(--text-secondary)]" />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-sm text-[var(--text-secondary)] mb-1">Available Balance</p>
+                                <p className="text-2xl font-bold text-emerald-500">${summary.balance.toLocaleString()}</p>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                    Withdrawal Amount
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">$</span>
+                                    <input
+                                        type="number"
+                                        min="10"
+                                        max={summary.balance}
+                                        value={withdrawAmount}
+                                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                                        placeholder="Enter amount"
+                                        className="w-full pl-8 pr-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-[var(--text-primary)]"
+                                    />
                                 </div>
-                                <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)]">
-                                    <div>
-                                        <p className="text-sm text-[var(--text-secondary)]">Prize Won</p>
-                                        <p className="text-2xl font-bold text-emerald-500">${contest.prizeMoney?.toLocaleString()}</p>
-                                    </div>
-                                    <Link
-                                        to={`/contest/${contest._id}`}
-                                        className="px-4 py-2 bg-primary-100 dark:bg-primary-900/20 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-200 dark:hover:bg-primary-900/40 transition-colors"
-                                    >
-                                        View Details
-                                    </Link>
-                                </div>
+                                <p className="text-xs text-[var(--text-secondary)] mt-1">Minimum: $10</p>
+                            </div>
+
+                            <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/20 rounded-xl p-4">
+                                <p className="text-sm text-amber-700 dark:text-amber-400">
+                                    Withdrawals are processed via Stripe and typically take 2-3 business days.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => setShowWithdrawModal(false)}
+                                    className="flex-1 px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleWithdraw}
+                                    disabled={withdrawMutation.isPending}
+                                    className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50"
+                                >
+                                    {withdrawMutation.isPending ? 'Processing...' : 'Withdraw'}
+                                </button>
                             </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
             )}
         </div>

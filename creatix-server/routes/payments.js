@@ -2,6 +2,7 @@ import express from 'express';
 import Stripe from 'stripe';
 import Payment from '../models/Payment.js';
 import Contest from '../models/Contest.js';
+import Submission from '../models/Submission.js';
 import User from '../models/User.js';
 import { verifyToken } from '../middlewares/auth.js';
 
@@ -145,29 +146,120 @@ router.get('/my-payments', verifyToken, async (req, res) => {
     }
 });
 
-// Get user's participated contests
+// Get user's participated contests with submission info
 router.get('/participated', verifyToken, async (req, res) => {
     try {
+        // Get all contests the user has participated in
         const contests = await Contest.find({ participants: req.user._id })
-            .populate('winner', 'name photo')
-            .sort({ deadline: 1 });
+            .populate('creator', 'name photo')
+            .populate('winners.user', 'name photo')
+            .sort({ deadline: -1 });
 
-        res.json(contests);
+        // Get user's submissions for these contests
+        const submissions = await Submission.find({
+            participant: req.user._id,
+            contest: { $in: contests.map(c => c._id) }
+        });
+
+        // Create a map of contest ID to submission
+        const submissionMap = {};
+        submissions.forEach(sub => {
+            submissionMap[sub.contest.toString()] = sub;
+        });
+
+        // Combine contest data with submission data
+        const contestsWithSubmissions = contests.map(contest => {
+            const submission = submissionMap[contest._id.toString()];
+            return {
+                ...contest.toObject(),
+                userSubmission: submission ? {
+                    _id: submission._id,
+                    rank: submission.rank,
+                    isWinner: submission.isWinner,
+                    prizeAmount: submission.prizeAmount,
+                } : null,
+            };
+        });
+
+        res.json(contestsWithSubmissions);
     } catch (error) {
         console.error('Get participated contests error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Get user's winning contests
+// Get user's winning contests with prize details
 router.get('/winnings', verifyToken, async (req, res) => {
     try {
-        const contests = await Contest.find({ winner: req.user._id })
-            .sort({ createdAt: -1 });
+        // Get all submissions where user won (has a rank)
+        const winningSubmissions = await Submission.find({
+            participant: req.user._id,
+            isWinner: true,
+        }).populate({
+            path: 'contest',
+            populate: { path: 'creator', select: 'name photo' }
+        });
 
-        res.json(contests);
+        // Calculate totals
+        const user = await User.findById(req.user._id);
+        const totalWinnings = winningSubmissions.reduce((sum, sub) => sum + (sub.prizeAmount || 0), 0);
+        
+        res.json({
+            winnings: winningSubmissions.map(sub => ({
+                _id: sub._id,
+                contest: sub.contest,
+                rank: sub.rank,
+                prizeAmount: sub.prizeAmount,
+                createdAt: sub.createdAt,
+            })),
+            summary: {
+                totalWinnings,
+                balance: user.balance || 0,
+                totalEarnings: user.totalEarnings || 0,
+                contestsWon: user.contestsWon || 0,
+            },
+        });
     } catch (error) {
         console.error('Get winnings error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Withdraw winnings
+router.post('/withdraw', verifyToken, async (req, res) => {
+    try {
+        const { amount, method } = req.body;
+
+        const user = await User.findById(req.user._id);
+        
+        if (!user.balance || user.balance < amount) {
+            return res.status(400).json({ message: 'Insufficient balance' });
+        }
+
+        if (amount < 10) {
+            return res.status(400).json({ message: 'Minimum withdrawal amount is $10' });
+        }
+
+        // Create withdrawal payment record
+        await Payment.create({
+            user: req.user._id,
+            contest: null, // Will reference a dummy/system contest
+            amount: amount,
+            type: 'withdrawal',
+            status: 'pending',
+            withdrawalMethod: method || 'stripe',
+        });
+
+        // Deduct from user balance
+        user.balance -= amount;
+        await user.save();
+
+        res.json({
+            message: 'Withdrawal request submitted successfully',
+            newBalance: user.balance,
+        });
+    } catch (error) {
+        console.error('Withdraw error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

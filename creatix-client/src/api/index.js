@@ -54,6 +54,7 @@ export const paymentsAPI = {
 export const leaderboardAPI = {
     getAll: (params) => api.get('/leaderboard', { params }),
     getTop: (limit = 10) => api.get('/leaderboard/top', { params: { limit } }),
+    getUserRank: (userId) => api.get(`/leaderboard/rank/${userId}`),
 };
 
 // Stats API

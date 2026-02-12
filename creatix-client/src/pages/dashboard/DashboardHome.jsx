@@ -84,7 +84,7 @@ const DashboardHome = () => {
 
             {/* Recent Activity */}
             <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-6">
-                <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6">Recent Contests</h2>
+                <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6">Ongoing Contests</h2>
 
                 {participatedContests.length === 0 ? (
                     <div className="text-center py-12">

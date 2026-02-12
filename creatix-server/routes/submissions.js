@@ -146,9 +146,9 @@ router.post('/:id/declare-winner', verifyToken, isCreator, async (req, res) => {
         submission.isWinner = true;
         await submission.save();
 
-        // Update user stats
+        // Update user stats - add 100 points for winning
         await User.findByIdAndUpdate(submission.participant, {
-            $inc: { contestsWon: 1 },
+            $inc: { contestsWon: 1, points: 100 },
         });
 
         res.json({ message: 'Winner declared successfully', submission });

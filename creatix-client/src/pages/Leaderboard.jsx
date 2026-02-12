@@ -96,9 +96,9 @@ const Leaderboard = () => {
                   {/* Stats */}
                   <div className="text-right shrink-0">
                     <p className="text-base sm:text-xl font-bold text-primary-600 dark:text-primary-400">
-                      {leader.contestsParticipated}
+                      {leader.points || 0} pts
                     </p>
-                    <p className="text-[10px] sm:text-xs text-[var(--text-secondary)]">participated</p>
+                    <p className="text-[10px] sm:text-xs text-[var(--text-secondary)]">{leader.contestsParticipated} participated</p>
                   </div>
                 </div>
               ))}

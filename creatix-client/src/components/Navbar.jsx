@@ -57,7 +57,7 @@ const Navbar = () => {
   ];
 
   const authenticatedNavLinks = [
-    { to: '/', label: 'Home' },
+    { to: '/', label: 'Dashboard' },
     { to: '/all-contests', label: 'All Contests' },
     { to: '/leaderboard', label: 'Leaderboard' },
   ];

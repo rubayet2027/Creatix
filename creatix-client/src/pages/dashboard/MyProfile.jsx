@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
-import { usersAPI } from '../../api';
+import { usersAPI, leaderboardAPI } from '../../api';
 import { HiUser, HiMail, HiCamera, HiLocationMarker, HiPencil, HiSave, HiUpload, HiX } from 'react-icons/hi';
+import { HiTrophy } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
 const IMGBB_API_KEY = '4f4a87363d60ebc0e5e8a6c574fd40f1'; // Free ImgBB API key
@@ -111,6 +112,19 @@ const MyProfile = () => {
     const won = dbUser?.contestsWon || 0;
     const winPercentage = participated > 0 ? Math.round((won / participated) * 100) : 0;
 
+    // Fetch user's rank
+    const { data: rankData } = useQuery({
+        queryKey: ['user-rank', dbUser?._id],
+        queryFn: async () => {
+            const response = await leaderboardAPI.getUserRank(dbUser._id);
+            return response.data;
+        },
+        enabled: !!dbUser?._id,
+    });
+
+    const userRank = rankData?.data?.rank;
+    const userPoints = rankData?.data?.points || dbUser?.points || 0;
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -126,39 +140,64 @@ const MyProfile = () => {
                 )}
             </div>
 
-            {/* Win Rate Chart */}
+            {/* Stats Section */}
             <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl p-8 text-white">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                    <div className="relative w-32 h-32">
-                        <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
-                            <circle
-                                cx="50"
-                                cy="50"
-                                r="45"
-                                fill="none"
-                                stroke="rgba(255,255,255,0.2)"
-                                strokeWidth="10"
-                            />
-                            <circle
-                                cx="50"
-                                cy="50"
-                                r="45"
-                                fill="none"
-                                stroke="white"
-                                strokeWidth="10"
-                                strokeLinecap="round"
-                                strokeDasharray={`${winPercentage * 2.83} 283`}
-                            />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-3xl font-bold">{winPercentage}%</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    {/* Win Rate Chart */}
+                    <div className="flex flex-col items-center">
+                        <div className="relative w-32 h-32">
+                            <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
+                                <circle
+                                    cx="50"
+                                    cy="50"
+                                    r="45"
+                                    fill="none"
+                                    stroke="rgba(255,255,255,0.2)"
+                                    strokeWidth="10"
+                                />
+                                <circle
+                                    cx="50"
+                                    cy="50"
+                                    r="45"
+                                    fill="none"
+                                    stroke="white"
+                                    strokeWidth="10"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${winPercentage * 2.83} 283`}
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-3xl font-bold">{winPercentage}%</span>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold mb-2">Win Rate</h2>
-                        <p className="text-primary-100">
-                            You've won {won} out of {participated} contests
+                        <h3 className="text-lg font-semibold mt-2">Win Rate</h3>
+                        <p className="text-primary-100 text-sm text-center">
+                            {won} of {participated} contests
                         </p>
+                    </div>
+
+                    {/* Rank Display */}
+                    <div className="flex flex-col items-center">
+                        <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-2">
+                            <HiTrophy className="w-10 h-10 text-yellow-300" />
+                        </div>
+                        <h3 className="text-lg font-semibold">Leaderboard Rank</h3>
+                        <p className="text-4xl font-bold mt-1">
+                            {participated > 0 && userRank ? `#${userRank}` : 'N/A'}
+                        </p>
+                        {participated === 0 && (
+                            <p className="text-primary-100 text-sm">No contests yet</p>
+                        )}
+                    </div>
+
+                    {/* Points Display */}
+                    <div className="flex flex-col items-center">
+                        <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-2">
+                            <span className="text-2xl font-bold">⭐</span>
+                        </div>
+                        <h3 className="text-lg font-semibold">Total Points</h3>
+                        <p className="text-4xl font-bold mt-1">{userPoints}</p>
+                        <p className="text-primary-100 text-sm">100 pts per win</p>
                     </div>
                 </div>
             </div>

@@ -108,8 +108,8 @@ const ContestSubmissions = () => {
             {/* Submissions List */}
             {submissions.length === 0 ? (
                 <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-12 text-center">
-                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <HiUser className="w-8 h-8 text-gray-400" />
+                    <div className="w-16 h-16 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                        <HiUser className="w-8 h-8 text-[var(--text-muted)]" />
                     </div>
                     <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Submissions Yet</h2>
                     <p className="text-[var(--text-secondary)]">Participants haven't submitted their work yet.</p>

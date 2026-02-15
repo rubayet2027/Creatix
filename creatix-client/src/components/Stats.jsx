@@ -160,7 +160,7 @@ const Stats = () => {
       <Container>
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 relative">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-6">
             <HiChartBar className="w-4 h-4 text-primary-500" aria-hidden="true" />
             <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
               By the Numbers

@@ -69,16 +69,16 @@ const ContestCard = ({ contest, showWinners = false }) => {
 
   const getCategoryColor = (cat) => {
     const colors = {
-      'Image Design': 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
-      'Article Writing': 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
-      'Marketing Strategy': 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
-      'Digital Advertisement': 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
-      'Gaming Review': 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
-      'Book Review': 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400',
-      'Business Idea': 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400',
-      'Movie Review': 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400',
+      'Image Design': 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+      'Article Writing': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+      'Marketing Strategy': 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      'Digital Advertisement': 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+      'Gaming Review': 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+      'Book Review': 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
+      'Business Idea': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+      'Movie Review': 'bg-pink-500/10 text-pink-600 dark:text-pink-400',
     };
-    return colors[cat] || 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400';
+    return colors[cat] || 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]';
   };
 
   return (
@@ -141,18 +141,18 @@ const ContestCard = ({ contest, showWinners = false }) => {
 
         {/* Winners Section (for past contests) */}
         {showWinners && winners && winners.length > 0 && (
-          <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+          <div className="mb-4 p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
             <div className="flex items-center gap-2 mb-2">
               <HiTrophy className="w-4 h-4 text-amber-500" />
-              <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Winners</span>
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Winners</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {winners.slice(0, 3).map((winner, idx) => (
                 <div key={winner.user?._id || idx} className="flex items-center gap-1">
                   <span className={`text-xs font-bold ${
                     winner.rank === 1 ? 'text-amber-500' : 
-                    winner.rank === 2 ? 'text-gray-400' : 
-                    'text-amber-700'
+                    winner.rank === 2 ? 'text-[var(--text-muted)]' : 
+                    'text-amber-700 dark:text-amber-600'
                   }`}>
                     #{winner.rank}
                   </span>

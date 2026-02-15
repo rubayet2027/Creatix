@@ -69,9 +69,9 @@ const ApplyAsCreator = () => {
     const renderStatus = () => {
         if (isCreator) {
             return (
-                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-8 text-center">
-                    <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <HiCheckCircle className="w-10 h-10 text-emerald-600" />
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-8 text-center">
+                    <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <HiCheckCircle className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mb-2">
                         You're Already a Creator!
@@ -91,9 +91,9 @@ const ApplyAsCreator = () => {
 
         if (isPending) {
             return (
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-8 text-center">
-                    <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <HiClock className="w-10 h-10 text-amber-600 animate-pulse" />
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-8 text-center">
+                    <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <HiClock className="w-10 h-10 text-amber-600 dark:text-amber-400 animate-pulse" />
                     </div>
                     <h2 className="text-2xl font-bold text-amber-700 dark:text-amber-400 mb-2">
                         Application Pending
@@ -110,9 +110,9 @@ const ApplyAsCreator = () => {
 
         if (isRejected) {
             return (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
-                    <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <HiXCircle className="w-10 h-10 text-red-600" />
+                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center">
+                    <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <HiXCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
                     </div>
                     <h2 className="text-2xl font-bold text-red-700 dark:text-red-400 mb-2">
                         Application Not Approved
@@ -132,9 +132,9 @@ const ApplyAsCreator = () => {
         }
 
         return (
-            <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-2xl p-8 text-center">
-                <div className="w-20 h-20 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <HiLightBulb className="w-10 h-10 text-primary-600" />
+            <div className="bg-primary-500/10 border border-primary-500/20 rounded-2xl p-8 text-center">
+                <div className="w-20 h-20 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <HiLightBulb className="w-10 h-10 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
                     Ready to Create?
@@ -190,8 +190,8 @@ const ApplyAsCreator = () => {
                                 key={benefit.title}
                                 className="flex gap-4 p-4 rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors"
                             >
-                                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <benefit.icon className="w-6 h-6 text-primary-600" />
+                                <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <benefit.icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-[var(--text-primary)] mb-1">

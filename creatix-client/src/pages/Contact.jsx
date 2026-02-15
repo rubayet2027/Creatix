@@ -65,8 +65,8 @@ const Contact = () => {
                                 </h2>
                                 {contactInfo.map((item) => (
                                     <div key={item.label} className="flex items-start gap-4">
-                                        <div className="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center shrink-0">
-                                            <item.icon className="w-5 h-5 text-primary-600" />
+                                        <div className="w-10 h-10 rounded-lg bg-primary-500/10 flex items-center justify-center shrink-0">
+                                            <item.icon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                                         </div>
                                         <div>
                                             <p className="text-sm text-[var(--text-secondary)]">{item.label}</p>
@@ -92,7 +92,7 @@ const Contact = () => {
                                             <a
                                                 key={social}
                                                 href="#"
-                                                className="w-10 h-10 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-primary-100 hover:text-primary-600 dark:hover:bg-primary-900/20 transition-colors"
+                                                className="w-10 h-10 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                                             >
                                                 {social[0]}
                                             </a>

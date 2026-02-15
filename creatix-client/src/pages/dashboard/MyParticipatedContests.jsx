@@ -28,9 +28,9 @@ const MyParticipatedContests = () => {
 
     const getRankBadge = (submission) => {
         if (!submission) return null;
-        if (submission.rank === 1) return { icon: '🥇', text: '1st Place', color: 'bg-amber-100 dark:bg-amber-900/20 text-amber-600' };
-        if (submission.rank === 2) return { icon: '🥈', text: '2nd Place', color: 'bg-gray-100 dark:bg-gray-800 text-gray-500' };
-        if (submission.rank === 3) return { icon: '🥉', text: '3rd Place', color: 'bg-orange-100 dark:bg-orange-900/20 text-orange-600' };
+        if (submission.rank === 1) return { icon: '🥇', text: '1st Place', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' };
+        if (submission.rank === 2) return { icon: '🥈', text: '2nd Place', color: 'bg-gray-500/10 text-gray-500 dark:text-gray-400' };
+        if (submission.rank === 3) return { icon: '🥉', text: '3rd Place', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' };
         return null;
     };
 
@@ -46,7 +46,7 @@ const MyParticipatedContests = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-[var(--text-primary)]">My Participated Contests</h1>
-                <span className="px-4 py-2 bg-primary-100 dark:bg-primary-900/20 text-primary-600 rounded-lg text-sm font-medium">
+                <span className="px-4 py-2 bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-lg text-sm font-medium">
                     {contests.length} Contest{contests.length !== 1 ? 's' : ''}
                 </span>
             </div>
@@ -55,8 +55,8 @@ const MyParticipatedContests = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                            <HiChartBar className="w-5 h-5 text-blue-600" />
+                        <div className="p-2 bg-blue-500/10 rounded-lg">
+                            <HiChartBar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold text-[var(--text-primary)]">{totalContests}</p>
@@ -66,8 +66,8 @@ const MyParticipatedContests = () => {
                 </div>
                 <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
-                            <HiStar className="w-5 h-5 text-amber-600" />
+                        <div className="p-2 bg-amber-500/10 rounded-lg">
+                            <HiStar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold text-[var(--text-primary)]">{wins}</p>
@@ -77,8 +77,8 @@ const MyParticipatedContests = () => {
                 </div>
                 <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg">
-                            <HiTrendingUp className="w-5 h-5 text-emerald-600" />
+                        <div className="p-2 bg-emerald-500/10 rounded-lg">
+                            <HiTrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold text-[var(--text-primary)]">{winRate}%</p>
@@ -88,8 +88,8 @@ const MyParticipatedContests = () => {
                 </div>
                 <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                            <HiCash className="w-5 h-5 text-purple-600" />
+                        <div className="p-2 bg-purple-500/10 rounded-lg">
+                            <HiCash className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold text-[var(--text-primary)]">${totalPrizeWon.toLocaleString()}</p>
@@ -101,7 +101,7 @@ const MyParticipatedContests = () => {
 
             {sortedContests.length === 0 ? (
                 <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-12 text-center">
-                    <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <HiClock className="w-8 h-8 text-primary-500" />
                     </div>
                     <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Contests Yet</h2>
@@ -182,18 +182,18 @@ const MyParticipatedContests = () => {
                                             <td className="px-6 py-4">
                                                 {ended ? (
                                                     contest.status === 'completed' || contest.winners?.length > 0 ? (
-                                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 text-sm rounded-full">
+                                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm rounded-full">
                                                             <HiCheckCircle className="w-4 h-4" />
                                                             Completed
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/20 text-amber-600 text-sm rounded-full">
+                                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm rounded-full">
                                                             <HiClock className="w-4 h-4" />
                                                             Judging
                                                         </span>
                                                     )
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 text-sm rounded-full">
+                                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm rounded-full">
                                                         <HiClock className="w-4 h-4" />
                                                         Active
                                                     </span>

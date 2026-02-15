@@ -208,21 +208,21 @@ const ManageUsers = () => {
         switch (role) {
             case 'admin':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 text-sm font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium rounded-full">
                         <HiShieldCheck className="w-4 h-4" />
                         Admin
                     </span>
                 );
             case 'creator':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-600 text-sm font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-500/10 text-purple-600 dark:text-purple-400 text-sm font-medium rounded-full">
                         <HiUserGroup className="w-4 h-4" />
                         Creator
                     </span>
                 );
             default:
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 text-sm font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-medium rounded-full">
                         <HiUser className="w-4 h-4" />
                         User
                     </span>
@@ -233,14 +233,14 @@ const ManageUsers = () => {
     const getStatusBadge = (status) => {
         if (status === 'banned') {
             return (
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 text-xs font-medium rounded-full">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium rounded-full">
                     <HiBan className="w-3 h-3" />
                     Banned
                 </span>
             );
         }
         return (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs font-medium rounded-full">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-medium rounded-full">
                 <HiCheck className="w-3 h-3" />
                 Active
             </span>
@@ -253,21 +253,21 @@ const ManageUsers = () => {
         switch (user.creatorStatus) {
             case 'pending':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 text-xs font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-xs font-medium rounded-full">
                         <HiClock className="w-3 h-3" />
                         Pending
                     </span>
                 );
             case 'approved':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-medium rounded-full">
                         <HiCheck className="w-3 h-3" />
                         Approved
                     </span>
                 );
             case 'rejected':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 text-xs font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium rounded-full">
                         <HiX className="w-3 h-3" />
                         Rejected
                     </span>
@@ -299,11 +299,11 @@ const ManageUsers = () => {
                 <h1 className="text-2xl font-bold text-[var(--text-primary)]">Manage Users</h1>
                 <div className="flex flex-wrap items-center gap-3">
                     {pendingRequests.length > 0 && (
-                        <span className="px-4 py-2 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 rounded-lg text-sm font-medium">
+                        <span className="px-4 py-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-lg text-sm font-medium">
                             {pendingRequests.length} Pending Requests
                         </span>
                     )}
-                    <span className="px-4 py-2 bg-primary-100 dark:bg-primary-900/20 text-primary-600 rounded-lg text-sm font-medium">
+                    <span className="px-4 py-2 bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-lg text-sm font-medium">
                         {pagination?.total || 0} Total Users
                     </span>
                 </div>

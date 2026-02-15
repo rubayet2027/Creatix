@@ -47,21 +47,21 @@ const MyCreatedContests = () => {
         switch (status) {
             case 'approved':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm rounded-full">
                         <HiCheckCircle className="w-4 h-4" />
                         Approved
                     </span>
                 );
             case 'rejected':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/10 text-red-600 dark:text-red-400 text-sm rounded-full">
                         <HiXCircle className="w-4 h-4" />
                         Rejected
                     </span>
                 );
             default:
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/20 text-amber-600 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm rounded-full">
                         <HiClock className="w-4 h-4" />
                         Pending
                     </span>
@@ -91,7 +91,7 @@ const MyCreatedContests = () => {
 
             {contests.length === 0 ? (
                 <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-12 text-center">
-                    <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <HiClock className="w-8 h-8 text-primary-500" />
                     </div>
                     <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Contests Yet</h2>

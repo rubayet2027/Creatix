@@ -59,7 +59,7 @@ const Leaderboard = () => {
           </div>
         ) : leaders.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <HiTrophy className="w-8 h-8 text-primary-500" />
             </div>
             <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Winners Yet</h2>

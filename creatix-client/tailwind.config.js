@@ -11,6 +11,7 @@ export default {
                 sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
             },
             colors: {
+                // Brand primary purple scale
                 primary: {
                     50: '#f5f3ff',
                     100: '#ede9fe',
@@ -24,6 +25,7 @@ export default {
                     900: '#4c1d95',
                     950: '#3b0764',
                 },
+                // Slate gray scale (for secondary)
                 secondary: {
                     50: '#f8fafc',
                     100: '#f1f5f9',
@@ -37,6 +39,38 @@ export default {
                     900: '#0f172a',
                     950: '#020617',
                 },
+                // Semantic color tokens (using CSS variables)
+                surface: {
+                    primary: 'var(--bg-primary)',
+                    secondary: 'var(--bg-secondary)',
+                    tertiary: 'var(--bg-tertiary)',
+                    card: 'var(--card-bg)',
+                },
+                content: {
+                    primary: 'var(--text-primary)',
+                    secondary: 'var(--text-secondary)',
+                    muted: 'var(--text-muted)',
+                },
+                border: {
+                    DEFAULT: 'var(--border-color)',
+                    subtle: 'var(--border-subtle)',
+                    strong: 'var(--border-strong)',
+                },
+                status: {
+                    success: 'var(--success)',
+                    warning: 'var(--warning)',
+                    danger: 'var(--danger)',
+                    info: 'var(--info)',
+                },
+            },
+            boxShadow: {
+                'card': 'var(--shadow-card)',
+                'elevation-1': 'var(--shadow-sm)',
+                'elevation-2': 'var(--shadow-md)',
+                'elevation-3': 'var(--shadow-lg)',
+            },
+            backgroundColor: {
+                'backdrop': 'var(--backdrop)',
             },
         },
     },

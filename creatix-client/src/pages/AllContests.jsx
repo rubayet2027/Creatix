@@ -115,14 +115,14 @@ const AllContests = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${
-              timeline === 'ongoing' ? 'bg-green-100 dark:bg-green-900/30' :
-              timeline === 'upcoming' ? 'bg-blue-100 dark:bg-blue-900/30' :
-              'bg-gray-100 dark:bg-gray-800'
+              timeline === 'ongoing' ? 'bg-emerald-500/10' :
+              timeline === 'upcoming' ? 'bg-blue-500/10' :
+              'bg-[var(--bg-tertiary)]'
             }`}>
               <Icon className={`w-5 h-5 ${
-                timeline === 'ongoing' ? 'text-green-600 dark:text-green-400' :
-                timeline === 'upcoming' ? 'text-blue-600 dark:text-blue-400' :
-                'text-gray-600 dark:text-gray-400'
+                timeline === 'ongoing' ? 'text-emerald-500' :
+                timeline === 'upcoming' ? 'text-blue-500' :
+                'text-[var(--text-muted)]'
               }`} />
             </div>
             <div>
@@ -260,7 +260,7 @@ const AllContests = () => {
                 !timelineData.upcoming?.contests?.length && 
                 !timelineData.past?.contests?.length) && (
                 <div className="text-center py-20">
-                  <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <HiSearch className="w-8 h-8 text-primary-500" />
                   </div>
                   <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Contests Found</h2>
@@ -270,7 +270,7 @@ const AllContests = () => {
             </>
           ) : filteredData?.contests?.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <HiSearch className="w-8 h-8 text-primary-500" />
               </div>
               <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Contests Found</h2>

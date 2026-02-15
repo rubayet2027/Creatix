@@ -90,21 +90,21 @@ const ManageContests = () => {
         switch (status) {
             case 'approved':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm rounded-full">
                         <HiCheckCircle className="w-4 h-4" />
                         Approved
                     </span>
                 );
             case 'rejected':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/10 text-red-600 dark:text-red-400 text-sm rounded-full">
                         <HiXCircle className="w-4 h-4" />
                         Rejected
                     </span>
                 );
             default:
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/20 text-amber-600 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm rounded-full">
                         <HiClock className="w-4 h-4" />
                         Pending
                     </span>
@@ -118,7 +118,7 @@ const ManageContests = () => {
         
         if (deadlineDate < now) {
             return (
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-900/20 text-gray-600 text-xs rounded-full">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-500/10 text-gray-600 dark:text-gray-400 text-xs rounded-full">
                     <HiArchive className="w-3 h-3" />
                     Past
                 </span>
@@ -128,14 +128,14 @@ const ManageContests = () => {
         const daysUntil = Math.ceil((deadlineDate - now) / (1000 * 60 * 60 * 24));
         if (daysUntil <= 7) {
             return (
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs rounded-full">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 text-xs rounded-full">
                     <HiPlay className="w-3 h-3" />
                     Ongoing ({daysUntil}d left)
                 </span>
             );
         }
         return (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 text-xs rounded-full">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs rounded-full">
                 <HiCalendar className="w-3 h-3" />
                 Upcoming
             </span>
@@ -156,7 +156,7 @@ const ManageContests = () => {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold text-[var(--text-primary)]">Manage Contests</h1>
-                <span className="px-4 py-2 bg-primary-100 dark:bg-primary-900/20 text-primary-600 rounded-lg text-sm font-medium">
+                <span className="px-4 py-2 bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-lg text-sm font-medium">
                     {pagination?.total || 0} Total Contests
                 </span>
             </div>

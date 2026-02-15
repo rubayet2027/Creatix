@@ -48,13 +48,13 @@ const HowItWorks = () => {
   const getBgLight = (color) => {
     switch (color) {
       case 'primary':
-        return 'bg-primary-50 dark:bg-primary-900/20';
+        return 'bg-primary-500/10';
       case 'cyan':
-        return 'bg-cyan-50 dark:bg-cyan-900/20';
+        return 'bg-cyan-500/10';
       case 'emerald':
-        return 'bg-emerald-50 dark:bg-emerald-900/20';
+        return 'bg-emerald-500/10';
       default:
-        return 'bg-primary-50 dark:bg-primary-900/20';
+        return 'bg-primary-500/10';
     }
   };
 
@@ -63,7 +63,7 @@ const HowItWorks = () => {
       <Container>
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-6">
             <span
               className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"
               aria-hidden="true"

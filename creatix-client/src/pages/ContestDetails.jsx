@@ -466,7 +466,7 @@ const ContestDetails = () => {
                                             { value: countdown.minutes, label: 'Mins' },
                                             { value: countdown.seconds, label: 'Secs' },
                                         ].map((item) => (
-                                            <div key={item.label} className={`rounded-lg p-3 ${isContestUpcoming ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-[var(--bg-tertiary)]'}`}>
+                                            <div key={item.label} className={`rounded-lg p-3 ${isContestUpcoming ? 'bg-blue-500/10' : 'bg-[var(--bg-tertiary)]'}`}>
                                                 <p className={`text-2xl font-bold ${isContestUpcoming ? 'text-blue-600 dark:text-blue-400' : 'text-[var(--text-primary)]'}`}>{item.value}</p>
                                                 <p className="text-xs text-[var(--text-secondary)]">{item.label}</p>
                                             </div>
@@ -518,7 +518,7 @@ const ContestDetails = () => {
                         <div className="space-y-3">
                             {isParticipant ? (
                                 <>
-                                    <div className="flex items-center gap-2 text-emerald-500 justify-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                                    <div className="flex items-center gap-2 text-emerald-500 justify-center p-3 bg-emerald-500/10 rounded-xl">
                                         <HiCheckCircle className="w-5 h-5" />
                                         <span className="font-medium">You're registered!</span>
                                     </div>
@@ -531,7 +531,7 @@ const ContestDetails = () => {
                                         </button>
                                     )}
                                     {isContestUpcoming && (
-                                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                        <div className="text-center p-3 bg-blue-500/10 rounded-xl">
                                             <p className="text-blue-600 dark:text-blue-400 text-sm">Contest hasn't started yet</p>
                                         </div>
                                     )}

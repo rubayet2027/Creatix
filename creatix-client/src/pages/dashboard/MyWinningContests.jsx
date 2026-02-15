@@ -195,7 +195,7 @@ const MyWinningContests = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-[var(--text-primary)]">My Winnings</h1>
-                <span className="px-4 py-2 bg-amber-100 dark:bg-amber-900/20 text-amber-600 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span className="px-4 py-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg text-sm font-medium flex items-center gap-2">
                     <HiStar className="w-4 h-4" />
                     {summary.contestsWon} Win{summary.contestsWon !== 1 ? 's' : ''}
                 </span>
@@ -244,7 +244,7 @@ const MyWinningContests = () => {
 
             {winnings.length === 0 ? (
                 <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-12 text-center">
-                    <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <HiStar className="w-8 h-8 text-amber-500" />
                     </div>
                     <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Wins Yet</h2>
@@ -304,7 +304,7 @@ const MyWinningContests = () => {
                                         {contest && (
                                             <Link
                                                 to={`/contest/${contest._id}`}
-                                                className="px-4 py-2 bg-primary-100 dark:bg-primary-900/20 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-200 dark:hover:bg-primary-900/40 transition-colors"
+                                                className="px-4 py-2 bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-lg text-sm font-medium hover:bg-primary-500/20 transition-colors"
                                             >
                                                 View Details
                                             </Link>

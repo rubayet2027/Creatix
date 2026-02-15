@@ -89,7 +89,7 @@ const DashboardHome = () => {
 
                 {participatedContests.length === 0 ? (
                     <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                             <HiCollection className="w-8 h-8 text-primary-500" />
                         </div>
                         <p className="text-[var(--text-secondary)] mb-4">You haven't participated in any contests yet.</p>

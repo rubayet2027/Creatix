@@ -120,7 +120,7 @@ const ImageUpload = ({ value, onChange, className = '' }) => {
                         w-full h-48 flex flex-col items-center justify-center gap-3
                         border-2 border-dashed rounded-xl cursor-pointer transition-all
                         ${isDragging
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                            ? 'border-primary-500 bg-primary-500/10'
                             : 'border-[var(--border-color)] hover:border-primary-400 hover:bg-[var(--bg-tertiary)]'
                         }
                         ${isUploading ? 'opacity-50 cursor-wait' : ''}

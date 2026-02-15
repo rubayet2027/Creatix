@@ -133,7 +133,7 @@ export default function About() {
                     role="listitem"
                   >
                     <div
-                      className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 mb-4"
+                      className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary-500/10 mb-4"
                       aria-hidden="true"
                     >
                       <IconComponent className="w-6 h-6 text-primary-600 dark:text-primary-400" />

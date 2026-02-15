@@ -31,7 +31,11 @@ const contestSchema = new mongoose.Schema({
     contestType: {
         type: String,
         required: [true, 'Contest type is required'],
-        enum: ['Image Design', 'Article Writing', 'Marketing Strategy', 'Digital Advertisement', 'Gaming Review', 'Book Review', 'Business Idea', 'Movie Review'],
+        enum: ['Image Design', 'Article Writing', 'Marketing Strategy', 'Digital Advertisement', 'Gaming Review', 'Book Review', 'Business Idea', 'Movie Review', 'Hackathon', 'Competitive Programming', 'UI/UX Design', 'Logo Design', 'Video Editing', 'Photography', 'Music Production', 'App Development', 'Data Science', 'AI/ML Challenge'],
+    },
+    startDate: {
+        type: Date,
+        default: null,
     },
     deadline: {
         type: Date,

@@ -18,6 +18,16 @@ const CONTEST_TYPES = [
   'Book Review',
   'Business Idea',
   'Movie Review',
+  'Hackathon',
+  'Competitive Programming',
+  'UI/UX Design',
+  'Logo Design',
+  'Video Editing',
+  'Photography',
+  'Music Production',
+  'App Development',
+  'Data Science',
+  'AI/ML Challenge',
 ];
 
 const TIMELINE_TABS = [

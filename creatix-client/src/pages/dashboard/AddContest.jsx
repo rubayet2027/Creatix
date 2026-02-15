@@ -5,6 +5,7 @@ import DatePicker from 'react-datepicker';
 import { contestsAPI } from '../../api';
 import { HiPhotograph, HiCash, HiClipboard, HiCalendar, HiTag } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import ImageUpload from '../../components/ImageUpload';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const CONTEST_TYPES = [
@@ -16,11 +17,21 @@ const CONTEST_TYPES = [
     'Book Review',
     'Business Idea',
     'Movie Review',
+    'Hackathon',
+    'Competitive Programming',
+    'UI/UX Design',
+    'Logo Design',
+    'Video Editing',
+    'Photography',
+    'Music Production',
+    'App Development',
+    'Data Science',
+    'AI/ML Challenge',
 ];
 
 const AddContest = () => {
     const navigate = useNavigate();
-    const { register, handleSubmit, control, formState: { errors } } = useForm({
+    const { register, handleSubmit, control, formState: { errors }, watch } = useForm({
         defaultValues: {
             name: '',
             image: '',
@@ -29,9 +40,12 @@ const AddContest = () => {
             prizeMoney: '',
             taskInstruction: '',
             contestType: CONTEST_TYPES[0],
+            startDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
             deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
         },
     });
+
+    const watchStartDate = watch('startDate');
 
     const createMutation = useMutation({
         mutationFn: contestsAPI.create,
@@ -74,16 +88,22 @@ const AddContest = () => {
                         )}
                     </div>
 
-                    {/* Image URL */}
+                    {/* Image Upload */}
                     <div>
                         <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                             <HiPhotograph className="inline w-4 h-4 mr-1" />
-                            Contest Image URL *
+                            Contest Image *
                         </label>
-                        <input
-                            {...register('image', { required: 'Image URL is required' })}
-                            placeholder="https://example.com/image.jpg"
-                            className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        <Controller
+                            name="image"
+                            control={control}
+                            rules={{ required: 'Contest image is required' }}
+                            render={({ field }) => (
+                                <ImageUpload
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                />
+                            )}
                         />
                         {errors.image && (
                             <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
@@ -152,30 +172,62 @@ const AddContest = () => {
                         </div>
                     </div>
 
-                    {/* Deadline */}
-                    <div>
-                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                            <HiCalendar className="inline w-4 h-4 mr-1" />
-                            Deadline *
-                        </label>
-                        <Controller
-                            control={control}
-                            name="deadline"
-                            rules={{ required: 'Deadline is required' }}
-                            render={({ field }) => (
-                                <DatePicker
-                                    selected={field.value}
-                                    onChange={(date) => field.onChange(date)}
-                                    showTimeSelect
-                                    dateFormat="MMMM d, yyyy h:mm aa"
-                                    minDate={new Date()}
-                                    className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                />
+                    {/* Start Date and End Date */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Start Date */}
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                                <HiCalendar className="inline w-4 h-4 mr-1" />
+                                Start Date *
+                            </label>
+                            <Controller
+                                control={control}
+                                name="startDate"
+                                rules={{ required: 'Start date is required' }}
+                                render={({ field }) => (
+                                    <DatePicker
+                                        selected={field.value}
+                                        onChange={(date) => field.onChange(date)}
+                                        showTimeSelect
+                                        dateFormat="MMMM d, yyyy h:mm aa"
+                                        minDate={new Date()}
+                                        className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    />
+                                )}
+                            />
+                            {errors.startDate && (
+                                <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>
                             )}
-                        />
-                        {errors.deadline && (
-                            <p className="text-red-500 text-sm mt-1">{errors.deadline.message}</p>
-                        )}
+                        </div>
+
+                        {/* End Date (Deadline) */}
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                                <HiCalendar className="inline w-4 h-4 mr-1" />
+                                End Date (Deadline) *
+                            </label>
+                            <Controller
+                                control={control}
+                                name="deadline"
+                                rules={{ 
+                                    required: 'End date is required',
+                                    validate: value => !watchStartDate || new Date(value) > new Date(watchStartDate) || 'End date must be after start date'
+                                }}
+                                render={({ field }) => (
+                                    <DatePicker
+                                        selected={field.value}
+                                        onChange={(date) => field.onChange(date)}
+                                        showTimeSelect
+                                        dateFormat="MMMM d, yyyy h:mm aa"
+                                        minDate={watchStartDate || new Date()}
+                                        className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    />
+                                )}
+                            />
+                            {errors.deadline && (
+                                <p className="text-red-500 text-sm mt-1">{errors.deadline.message}</p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Description */}

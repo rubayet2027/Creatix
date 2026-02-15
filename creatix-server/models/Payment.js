@@ -4,7 +4,8 @@ const paymentSchema = new mongoose.Schema({
     contest: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Contest',
-        required: true,
+        required: false, // Not required for withdrawals
+        default: null,
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -24,9 +25,13 @@ const paymentSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    stripePayoutId: {
+        type: String,
+        default: null,
+    },
     status: {
         type: String,
-        enum: ['pending', 'succeeded', 'failed', 'refunded'],
+        enum: ['pending', 'succeeded', 'failed', 'refunded', 'completed'],
         default: 'pending',
     },
     // For withdrawals

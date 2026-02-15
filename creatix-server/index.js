@@ -50,11 +50,42 @@ const apiLimiter = createRateLimiter({
     message: 'Too many requests from this IP, please try again after a minute',
 });
 
+// CORS configuration - allow multiple origins
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://creatix-cdeb7.web.app',
+    'https://creatix-cdeb7.firebaseapp.com',
+    process.env.CLIENT_URL,
+].filter(Boolean);
+
 // Middleware
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            // Allow all origins in production for now
+            callback(null, true);
+        }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Handle preflight OPTIONS requests explicitly
+app.options('*', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.sendStatus(200);
+});
+
 app.use(express.json());
 app.use('/api', apiLimiter);
 
@@ -71,6 +102,58 @@ app.use('/api/stats', statsRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Creatix API is running' });
+});
+
+// Debug Firebase Admin SDK initialization
+app.get('/api/debug/firebase', async (req, res) => {
+    try {
+        const { getAuth } = await import('./config/firebase.js');
+        const auth = getAuth();
+        res.json({ 
+            status: 'ok', 
+            message: 'Firebase Admin SDK initialized',
+            hasAuth: !!auth,
+            hasVerifyIdToken: typeof auth?.verifyIdToken === 'function'
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            status: 'error', 
+            message: error.message,
+            stack: error.stack
+        });
+    }
+});
+
+// Debug token verification
+app.post('/api/debug/verify-token', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(400).json({ message: 'No token provided' });
+        }
+        
+        const token = authHeader.split(' ')[1];
+        const { auth } = await import('./config/firebase.js');
+        
+        console.log('Attempting to verify token...');
+        const decoded = await auth.verifyIdToken(token);
+        console.log('Token verified for:', decoded.email);
+        
+        res.json({ 
+            status: 'ok',
+            email: decoded.email,
+            uid: decoded.uid,
+            iat: decoded.iat,
+            exp: decoded.exp
+        });
+    } catch (error) {
+        console.error('Token verification error:', error);
+        res.status(401).json({ 
+            status: 'error', 
+            code: error.code,
+            message: error.message 
+        });
+    }
 });
 
 // Root route

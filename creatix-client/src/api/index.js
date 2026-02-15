@@ -28,6 +28,7 @@ export const contestsAPI = {
     getByTimeline: () => api.get('/contests/by-timeline'),
     getPopular: (limit = 6) => api.get('/contests/popular', { params: { limit } }),
     getById: (id) => api.get(`/contests/${id}`),
+    getLeaderboard: (id, params) => api.get(`/contests/${id}/leaderboard`, { params }),
     getMyContests: () => api.get('/contests/my-contests'),
     getAdminAll: (params) => api.get('/contests/admin/all', { params }),
     create: (data) => api.post('/contests', data),
@@ -51,7 +52,7 @@ export const paymentsAPI = {
     getMyPayments: () => api.get('/payments/my-payments'),
     getParticipated: () => api.get('/payments/participated'),
     getWinnings: () => api.get('/payments/winnings'),
-    withdraw: (amount, method) => api.post('/payments/withdraw', { amount, method }),
+    withdraw: (amount, method, accountDetails) => api.post('/payments/withdraw', { amount, method, accountDetails }),
 };
 
 // Leaderboard API

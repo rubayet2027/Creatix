@@ -8,13 +8,26 @@ export const verifyToken = async (req, res, next) => {
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            console.log('❌ No auth header or invalid format');
             return res.status(401).json({ message: 'No token provided' });
         }
 
         const token = authHeader.split(' ')[1];
+        console.log('🔍 Verifying token (first 20 chars):', token.substring(0, 20) + '...');
 
         // Verify Firebase ID token
-        const decodedToken = await auth.verifyIdToken(token);
+        let decodedToken;
+        try {
+            decodedToken = await auth.verifyIdToken(token);
+            console.log('✅ Token verified for:', decodedToken.email);
+        } catch (verifyError) {
+            console.error('❌ Token verification failed:', verifyError.message);
+            console.error('Error code:', verifyError.code);
+            return res.status(401).json({ 
+                message: 'Invalid or expired token',
+                error: verifyError.code || verifyError.message 
+            });
+        }
 
         // ALWAYS fetch fresh user data from database - never trust cached data
         let user = await User.findOne({ firebaseUid: decodedToken.uid });
@@ -32,6 +45,9 @@ export const verifyToken = async (req, res, next) => {
                 // Only grant admin role to the hardcoded admin email
                 role: isHardcodedAdmin ? 'admin' : 'user',
             });
+            console.log('✅ Created new user:', user.email);
+        } else {
+            console.log('✅ Found existing user:', user.email);
         }
 
         // Attach fresh user data to request

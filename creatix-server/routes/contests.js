@@ -20,11 +20,18 @@ router.get('/', async (req, res) => {
                 { status: 'approved', deadline: { $lt: now } }
             ];
         } else if (timeline === 'ongoing') {
+            // Ongoing: has started (startDate <= now or no startDate) AND deadline hasn't passed
             filter.status = 'approved';
-            filter.deadline = { $gte: now, $lte: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) };
+            filter.deadline = { $gte: now };
+            filter.$or = [
+                { startDate: { $lte: now } },
+                { startDate: null },
+                { startDate: { $exists: false } }
+            ];
         } else if (timeline === 'upcoming') {
+            // Upcoming: startDate is in the future
             filter.status = 'approved';
-            filter.deadline = { $gt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) };
+            filter.startDate = { $gt: now };
         } else {
             // Default: show all approved and completed
             filter.$or = [
@@ -77,7 +84,6 @@ router.get('/', async (req, res) => {
 router.get('/by-timeline', async (req, res) => {
     try {
         const now = new Date();
-        const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
         // Past contests (deadline passed or status is completed)
         const pastContests = await Contest.find({
@@ -91,22 +97,27 @@ router.get('/by-timeline', async (req, res) => {
             .sort({ deadline: -1 })
             .limit(6);
 
-        // Ongoing contests (deadline within 7 days)
+        // Ongoing contests (has started AND deadline not passed)
         const ongoingContests = await Contest.find({
             status: 'approved',
-            deadline: { $gte: now, $lte: oneWeekFromNow }
+            deadline: { $gte: now },
+            $or: [
+                { startDate: { $lte: now } },
+                { startDate: null },
+                { startDate: { $exists: false } }
+            ]
         })
             .populate('creator', 'name photo')
             .sort({ deadline: 1 })
             .limit(6);
 
-        // Upcoming contests (deadline more than 7 days away)
+        // Upcoming contests (startDate is in the future)
         const upcomingContests = await Contest.find({
             status: 'approved',
-            deadline: { $gt: oneWeekFromNow }
+            startDate: { $gt: now }
         })
             .populate('creator', 'name photo')
-            .sort({ deadline: 1 })
+            .sort({ startDate: 1 })
             .limit(6);
 
         // Get counts for each category
@@ -118,11 +129,16 @@ router.get('/by-timeline', async (req, res) => {
         });
         const ongoingCount = await Contest.countDocuments({
             status: 'approved',
-            deadline: { $gte: now, $lte: oneWeekFromNow }
+            deadline: { $gte: now },
+            $or: [
+                { startDate: { $lte: now } },
+                { startDate: null },
+                { startDate: { $exists: false } }
+            ]
         });
         const upcomingCount = await Contest.countDocuments({
             status: 'approved',
-            deadline: { $gt: oneWeekFromNow }
+            startDate: { $gt: now }
         });
 
         res.json({
@@ -262,6 +278,79 @@ router.get('/my-contests', verifyToken, isCreator, async (req, res) => {
         res.json(contests);
     } catch (error) {
         console.error('Get my contests error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get contest leaderboard/participants with pagination
+router.get('/:id/leaderboard', async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const contest = await Contest.findById(req.params.id)
+            .populate('participants', 'name photo email')
+            .populate('winner', 'name photo');
+
+        if (!contest) {
+            return res.status(404).json({ message: 'Contest not found' });
+        }
+
+        // Import Submission model to get submission status
+        const Submission = (await import('../models/Submission.js')).default;
+
+        // Get all participants with their submission status
+        const participantsWithStatus = await Promise.all(
+            contest.participants.map(async (participant) => {
+                const submission = await Submission.findOne({
+                    contest: req.params.id,
+                    participant: participant._id,
+                });
+                return {
+                    _id: participant._id,
+                    name: participant.name,
+                    photo: participant.photo,
+                    email: participant.email,
+                    hasSubmitted: !!submission,
+                    submissionDate: submission?.createdAt || null,
+                    isWinner: contest.winner?._id?.toString() === participant._id.toString(),
+                };
+            })
+        );
+
+        // Sort: winners first, then by submission date (submitted first), then by name
+        participantsWithStatus.sort((a, b) => {
+            if (a.isWinner !== b.isWinner) return b.isWinner - a.isWinner;
+            if (a.hasSubmitted !== b.hasSubmitted) return b.hasSubmitted - a.hasSubmitted;
+            if (a.submissionDate && b.submissionDate) {
+                return new Date(a.submissionDate) - new Date(b.submissionDate);
+            }
+            return a.name.localeCompare(b.name);
+        });
+
+        // Paginate
+        const total = participantsWithStatus.length;
+        const paginatedParticipants = participantsWithStatus.slice(skip, skip + parseInt(limit));
+
+        res.json({
+            success: true,
+            contest: {
+                _id: contest._id,
+                name: contest.name,
+                status: contest.status,
+                deadline: contest.deadline,
+                winner: contest.winner,
+            },
+            participants: paginatedParticipants,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                pages: Math.ceil(total / parseInt(limit)),
+            },
+        });
+    } catch (error) {
+        console.error('Get contest leaderboard error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

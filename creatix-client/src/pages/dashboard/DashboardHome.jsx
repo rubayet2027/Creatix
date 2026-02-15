@@ -17,13 +17,14 @@ const DashboardHome = () => {
     });
 
     // Fetch winning contests
-    const { data: winningContests = [] } = useQuery({
+    const { data: winningData } = useQuery({
         queryKey: ['winning-contests'],
         queryFn: async () => {
             const response = await paymentsAPI.getWinnings();
             return response.data;
         },
     });
+    const winningContests = winningData?.winnings || [];
 
     const stats = [
         {
@@ -40,7 +41,7 @@ const DashboardHome = () => {
         },
         {
             label: 'Total Prize Won',
-            value: `$${winningContests.reduce((sum, c) => sum + (c.prizeMoney || 0), 0).toLocaleString()}`,
+            value: `$${winningContests.reduce((sum, c) => sum + (c.prizeAmount || 0), 0).toLocaleString()}`,
             icon: HiCash,
             color: 'bg-emerald-500',
         },

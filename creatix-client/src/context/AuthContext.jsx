@@ -8,7 +8,7 @@ import {
     onAuthStateChanged,
     updateProfile
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, authReady } from '../config/firebase';
 import { authAPI } from '../api';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -178,45 +178,49 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth state changes with improved persistence
     useEffect(() => {
         let isMounted = true;
+        let unsubscribeAuth = null;
         
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        // Wait for auth to be ready before setting up listener
+        authReady.then(() => {
             if (!isMounted) return;
             
-            setUser(firebaseUser);
+            unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+                if (!isMounted) return;
+                
+                setUser(firebaseUser);
 
-            if (firebaseUser) {
-                try {
-                    // Wait a small delay to ensure Firebase is fully ready
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    
-                    // Ensure we can get a token before making API calls
-                    await firebaseUser.getIdToken(true);
-                    
-                    // ALWAYS fetch fresh user data from backend on auth state change
-                    // This ensures role/permissions are always up-to-date
-                    await refreshUser();
-                } catch (error) {
-                    console.error('Failed to refresh user on auth change:', error);
-                    // Fallback to stored user if available
-                    const storedUser = localStorage.getItem('user');
-                    if (storedUser && isMounted) {
-                        setDbUser(JSON.parse(storedUser));
+                if (firebaseUser) {
+                    try {
+                        // Small delay to ensure token is ready for API calls
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                        // Fetch fresh user data from backend
+                        await refreshUser();
+                    } catch (error) {
+                        console.error('Failed to refresh user on auth change:', error);
+                        // Fallback to stored user if available
+                        const storedUser = localStorage.getItem('user');
+                        if (storedUser && isMounted) {
+                            setDbUser(JSON.parse(storedUser));
+                        }
+                    }
+                } else {
+                    if (isMounted) {
+                        setDbUser(null);
+                        localStorage.removeItem('user');
                     }
                 }
-            } else {
-                if (isMounted) {
-                    setDbUser(null);
-                    localStorage.removeItem('user');
-                }
-            }
 
-            setLoading(false);
-            setAuthChecked(true);
+                setLoading(false);
+                setAuthChecked(true);
+            });
         });
 
         return () => {
             isMounted = false;
-            unsubscribe();
+            if (unsubscribeAuth) {
+                unsubscribeAuth();
+            }
         };
     }, [refreshUser]);
 

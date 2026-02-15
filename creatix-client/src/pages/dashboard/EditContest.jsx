@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import DatePicker from 'react-datepicker';
 import { contestsAPI } from '../../api';
-import { HiArrowLeft } from 'react-icons/hi';
+import { HiArrowLeft, HiCalendar, HiCash, HiClipboard, HiPhotograph, HiTag } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import ImageUpload from '../../components/ImageUpload';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const CONTEST_TYPES = [
@@ -16,6 +17,16 @@ const CONTEST_TYPES = [
     'Book Review',
     'Business Idea',
     'Movie Review',
+    'Hackathon',
+    'Competitive Programming',
+    'UI/UX Design',
+    'Logo Design',
+    'Video Editing',
+    'Photography',
+    'Music Production',
+    'App Development',
+    'Data Science',
+    'AI/ML Challenge',
 ];
 
 const EditContest = () => {
@@ -31,7 +42,7 @@ const EditContest = () => {
         },
     });
 
-    const { register, handleSubmit, control, formState: { errors } } = useForm({
+    const { register, handleSubmit, control, formState: { errors }, watch } = useForm({
         values: contest ? {
             name: contest.name,
             image: contest.image,
@@ -40,9 +51,12 @@ const EditContest = () => {
             prizeMoney: contest.prizeMoney,
             taskInstruction: contest.taskInstruction,
             contestType: contest.contestType,
+            startDate: contest.startDate ? new Date(contest.startDate) : new Date(),
             deadline: new Date(contest.deadline),
         } : undefined,
     });
+
+    const watchStartDate = watch('startDate');
 
     const updateMutation = useMutation({
         mutationFn: (data) => contestsAPI.update(id, data),
@@ -108,14 +122,21 @@ const EditContest = () => {
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
                     </div>
 
-                    {/* Image URL */}
+                    {/* Image Upload */}
                     <div>
                         <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                            Contest Image URL *
+                            Contest Image *
                         </label>
-                        <input
-                            {...register('image', { required: 'Image URL is required' })}
-                            className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        <Controller
+                            name="image"
+                            control={control}
+                            rules={{ required: 'Contest image is required' }}
+                            render={({ field }) => (
+                                <ImageUpload
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                />
+                            )}
                         />
                         {errors.image && <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>}
                     </div>
@@ -165,27 +186,57 @@ const EditContest = () => {
                         </div>
                     </div>
 
-                    {/* Deadline */}
-                    <div>
-                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                            Deadline *
-                        </label>
-                        <Controller
-                            control={control}
-                            name="deadline"
-                            rules={{ required: 'Deadline is required' }}
-                            render={({ field }) => (
-                                <DatePicker
-                                    selected={field.value}
-                                    onChange={(date) => field.onChange(date)}
-                                    showTimeSelect
-                                    dateFormat="MMMM d, yyyy h:mm aa"
-                                    minDate={new Date()}
-                                    className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                />
-                            )}
-                        />
-                        {errors.deadline && <p className="text-red-500 text-sm mt-1">{errors.deadline.message}</p>}
+                    {/* Start Date and End Date */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Start Date */}
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                                <HiCalendar className="inline w-4 h-4 mr-1" />
+                                Start Date *
+                            </label>
+                            <Controller
+                                control={control}
+                                name="startDate"
+                                rules={{ required: 'Start date is required' }}
+                                render={({ field }) => (
+                                    <DatePicker
+                                        selected={field.value}
+                                        onChange={(date) => field.onChange(date)}
+                                        showTimeSelect
+                                        dateFormat="MMMM d, yyyy h:mm aa"
+                                        className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    />
+                                )}
+                            />
+                            {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
+                        </div>
+
+                        {/* End Date (Deadline) */}
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                                <HiCalendar className="inline w-4 h-4 mr-1" />
+                                End Date (Deadline) *
+                            </label>
+                            <Controller
+                                control={control}
+                                name="deadline"
+                                rules={{ 
+                                    required: 'End date is required',
+                                    validate: value => !watchStartDate || new Date(value) > new Date(watchStartDate) || 'End date must be after start date'
+                                }}
+                                render={({ field }) => (
+                                    <DatePicker
+                                        selected={field.value}
+                                        onChange={(date) => field.onChange(date)}
+                                        showTimeSelect
+                                        dateFormat="MMMM d, yyyy h:mm aa"
+                                        minDate={watchStartDate || new Date()}
+                                        className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    />
+                                )}
+                            />
+                            {errors.deadline && <p className="text-red-500 text-sm mt-1">{errors.deadline.message}</p>}
+                        </div>
                     </div>
 
                     {/* Description */}

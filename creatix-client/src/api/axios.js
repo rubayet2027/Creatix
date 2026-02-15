@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { auth } from '../config/firebase';
+import { auth, authReady } from '../config/firebase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -11,42 +11,55 @@ const api = axios.create({
     },
 });
 
-// Helper to wait for Firebase auth to be ready
-const waitForAuth = () => {
-    return new Promise((resolve) => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            unsubscribe();
-            resolve(user);
-        });
-    });
+// Track if initial auth check is complete
+let initialAuthComplete = false;
+
+// Wait for initial auth to be ready
+authReady.then(() => {
+    initialAuthComplete = true;
+    console.log('Auth ready, user:', auth.currentUser?.email || 'none');
+});
+
+// Helper to get a valid token with retries
+const getValidToken = async (user, forceRefresh = false) => {
+    let retries = 0;
+    const maxRetries = 3;
+    
+    while (retries < maxRetries) {
+        try {
+            const token = await user.getIdToken(forceRefresh || retries > 0);
+            return token;
+        } catch (error) {
+            retries++;
+            console.error(`Token fetch attempt ${retries} failed:`, error.message);
+            if (retries >= maxRetries) throw error;
+            // Wait with exponential backoff
+            await new Promise(r => setTimeout(r, 300 * retries));
+        }
+    }
 };
 
 // Request interceptor to add Firebase ID token
 api.interceptors.request.use(
     async (config) => {
-        // Wait for auth to be ready if currentUser is null but we're still initializing
-        let currentUser = auth.currentUser;
-        
-        if (!currentUser) {
-            // Wait a bit for auth to initialize
-            currentUser = await waitForAuth();
+        // Wait for initial auth check to complete
+        if (!initialAuthComplete) {
+            await authReady;
         }
+        
+        const currentUser = auth.currentUser;
         
         if (currentUser) {
             try {
-                // Get fresh Firebase ID token
-                const token = await currentUser.getIdToken(true);
+                // Always try to get a fresh token for authenticated requests
+                const token = await getValidToken(currentUser, true);
                 config.headers.Authorization = `Bearer ${token}`;
+                console.log('Token attached for:', config.url);
             } catch (error) {
                 console.error('Error getting Firebase token:', error);
-                // Try without force refresh as fallback
-                try {
-                    const token = await currentUser.getIdToken(false);
-                    config.headers.Authorization = `Bearer ${token}`;
-                } catch (fallbackError) {
-                    console.error('Fallback token fetch failed:', fallbackError);
-                }
             }
+        } else {
+            console.log('No current user for request:', config.url);
         }
         return config;
     },
@@ -64,11 +77,12 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             
-            // Try to refresh the token and retry
+            // Try to refresh the token
             const currentUser = auth.currentUser;
             if (currentUser) {
                 try {
-                    const newToken = await currentUser.getIdToken(true);
+                    // Force refresh the token
+                    const newToken = await getValidToken(currentUser, true);
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;
                     return api(originalRequest);
                 } catch (refreshError) {

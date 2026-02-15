@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -21,13 +21,18 @@ const initializeFirebase = () => {
         // Check if running in production with base64 encoded credentials
         if (process.env.FIREBASE_ADMIN_SDK_BASE64) {
             console.log('🔧 Loading Firebase Admin SDK from environment variable');
-            const decoded = Buffer.from(process.env.FIREBASE_ADMIN_SDK_BASE64, 'base64').toString();
+            const decoded = Buffer.from(process.env.FIREBASE_ADMIN_SDK_BASE64, 'base64').toString('utf8');
             serviceAccount = JSON.parse(decoded);
+            console.log('📋 Project ID:', serviceAccount.project_id);
         } else {
             // Local development - read from file
             console.log('🔧 Loading Firebase Admin SDK from file');
             const serviceAccountPath = join(__dirname, '..', 'firebase-admin-sdk.json');
+            if (!existsSync(serviceAccountPath)) {
+                throw new Error(`Firebase Admin SDK file not found at: ${serviceAccountPath}`);
+            }
             serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+            console.log('📋 Project ID:', serviceAccount.project_id);
         }
 
         firebaseApp = admin.initializeApp({

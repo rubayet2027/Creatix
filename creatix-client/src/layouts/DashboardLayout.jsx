@@ -1,4 +1,5 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     HiHome,
@@ -11,7 +12,10 @@ import {
     HiCog,
     HiLogout,
     HiArrowLeft,
-    HiBadgeCheck
+    HiBadgeCheck,
+    HiMenu,
+    HiX,
+    HiChevronRight
 } from 'react-icons/hi';
 import Container from '../components/layout/Container';
 import Navbar from '../components/Navbar';
@@ -20,6 +24,25 @@ import Footer from '../components/Footer';
 const DashboardLayout = () => {
     const { dbUser, logout, isAdmin, isCreator } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const mobileMenuRef = useRef(null);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [location.pathname]);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+                setMobileMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleLogout = async () => {
         await logout();
@@ -62,11 +85,172 @@ const DashboardLayout = () => {
         </NavLink>
     );
 
+    const MobileNavItem = ({ to, icon: Icon, label, end }) => (
+        <NavLink
+            to={to}
+            end={end}
+            className={({ isActive }) =>
+                `flex items-center justify-between px-4 py-3.5 rounded-xl transition-all ${isActive
+                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
+                    : 'text-[var(--text-secondary)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
+                }`
+            }
+        >
+            <div className="flex items-center gap-3">
+                <Icon className="w-5 h-5" />
+                <span className="font-medium">{label}</span>
+            </div>
+            <HiChevronRight className="w-4 h-4" />
+        </NavLink>
+    );
+
     return (
         <div className="min-h-screen flex flex-col bg-[var(--bg-primary)]">
             <Navbar />
             <div className="flex-grow pt-16">
                 <Container>
+                    {/* Mobile Dashboard Header */}
+                    <div className="lg:hidden flex items-center justify-between py-4 border-b border-[var(--border-color)]">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold">
+                                {dbUser?.name?.charAt(0) || 'U'}
+                            </div>
+                            <div>
+                                <p className="font-semibold text-[var(--text-primary)] text-sm">
+                                    {dbUser?.name || 'User'}
+                                </p>
+                                <p className="text-xs text-[var(--text-secondary)] capitalize">
+                                    {dbUser?.role || 'user'}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="p-2.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-color)]"
+                            aria-label="Toggle dashboard menu"
+                        >
+                            {mobileMenuOpen ? (
+                                <HiX className="w-5 h-5 text-[var(--text-primary)]" />
+                            ) : (
+                                <HiMenu className="w-5 h-5 text-[var(--text-primary)]" />
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Mobile Navigation Drawer - Slide from Left */}
+                    <div 
+                        className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${
+                            mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                        }`}
+                    >
+                        {/* Backdrop */}
+                        <div 
+                            className="absolute inset-0 bg-black/50"
+                            onClick={() => setMobileMenuOpen(false)}
+                        />
+                        
+                        {/* Drawer */}
+                        <div 
+                            ref={mobileMenuRef}
+                            className={`absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[var(--bg-secondary)] shadow-2xl transform transition-transform duration-300 ease-out ${
+                                mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                            }`}
+                        >
+                            {/* Drawer Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold">
+                                        {dbUser?.name?.charAt(0) || 'U'}
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-[var(--text-primary)] text-sm">
+                                            {dbUser?.name || 'User'}
+                                        </p>
+                                        <p className="text-xs text-[var(--text-secondary)] capitalize">
+                                            {dbUser?.role || 'user'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="p-2 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
+                                    aria-label="Close menu"
+                                >
+                                    <HiX className="w-5 h-5 text-[var(--text-secondary)]" />
+                                </button>
+                            </div>
+
+                            {/* Drawer Content */}
+                            <div className="p-4 space-y-2 overflow-y-auto h-[calc(100%-80px)]">
+                                <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-2">
+                                    Dashboard
+                                </p>
+                                {userNavItems.map((item) => (
+                                    <MobileNavItem key={item.to} {...item} />
+                                ))}
+
+                                {isCreator && (
+                                    <>
+                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3 px-2">
+                                            Creator
+                                        </p>
+                                        {creatorNavItems.map((item) => (
+                                            <MobileNavItem key={item.to} {...item} />
+                                        ))}
+                                    </>
+                                )}
+
+                                {!isCreator && !isAdmin && (
+                                    <>
+                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3 px-2">
+                                            Become a Creator
+                                        </p>
+                                        <MobileNavItem 
+                                            to="/dashboard/apply-creator" 
+                                            icon={HiBadgeCheck} 
+                                            label="Apply as Creator" 
+                                        />
+                                    </>
+                                )}
+
+                                {isAdmin && (
+                                    <>
+                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3 px-2">
+                                            Admin
+                                        </p>
+                                        {adminNavItems.map((item) => (
+                                            <MobileNavItem key={item.to} {...item} />
+                                        ))}
+                                    </>
+                                )}
+
+                                {/* Actions */}
+                                <div className="pt-6 mt-6 border-t border-[var(--border-color)] space-y-2">
+                                    <NavLink
+                                        to="/"
+                                        className="flex items-center justify-between px-4 py-3.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <HiArrowLeft className="w-5 h-5" />
+                                            <span className="font-medium">Back to Home</span>
+                                        </div>
+                                        <HiChevronRight className="w-4 h-4" />
+                                    </NavLink>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <HiLogout className="w-5 h-5" />
+                                            <span className="font-medium">Logout</span>
+                                        </div>
+                                        <HiChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="flex gap-8 py-8">
                     {/* Sidebar */}
                     <aside className="hidden lg:block w-64 shrink-0">

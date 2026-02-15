@@ -1,13 +1,119 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { paymentsAPI } from '../../api';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { HiStar, HiCash, HiCalendar, HiCreditCard, HiCurrencyDollar, HiX } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+// Withdraw Form Component with Stripe CardElement
+const WithdrawForm = ({ amount, balance, onSuccess, onCancel }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!stripe || !elements) return;
+
+        setIsProcessing(true);
+        setError('');
+
+        try {
+            // First, verify card by creating a payment method
+            const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: elements.getElement(CardElement),
+            });
+
+            if (stripeError) {
+                setError(stripeError.message);
+                setIsProcessing(false);
+                return;
+            }
+
+            // Process withdrawal with verified card
+            const response = await paymentsAPI.withdraw(amount, 'stripe', {
+                paymentMethodId: paymentMethod.id,
+            });
+            
+            onSuccess(response.data);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Withdrawal failed');
+            setIsProcessing(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl p-4 mb-4">
+                <div className="flex justify-between mb-2">
+                    <span className="text-[var(--text-secondary)]">Withdrawal Amount</span>
+                    <span className="text-lg font-bold text-primary-500">${amount}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-[var(--text-secondary)]">Remaining Balance</span>
+                    <span className="text-[var(--text-primary)] font-medium">${(balance - amount).toLocaleString()}</span>
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Card Details (for verification)
+                </label>
+                <div className="p-4 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-color)]">
+                    <CardElement
+                        options={{
+                            style: {
+                                base: {
+                                    fontSize: '16px',
+                                    color: '#424770',
+                                    '::placeholder': { color: '#aab7c4' },
+                                },
+                                invalid: { color: '#9e2146' },
+                            },
+                        }}
+                    />
+                </div>
+                <p className="text-xs text-[var(--text-secondary)] mt-2">
+                    Your card is used for identity verification. Funds will be transferred via Stripe.
+                </p>
+            </div>
+
+            {error && (
+                <p className="text-red-500 text-sm">{error}</p>
+            )}
+
+            <div className="flex gap-3">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="flex-1 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--bg-primary)] transition-colors font-medium"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    disabled={!stripe || isProcessing}
+                    className="flex-1 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-medium disabled:opacity-50"
+                >
+                    {isProcessing ? 'Processing...' : `Withdraw $${amount}`}
+                </button>
+            </div>
+        </form>
+    );
+};
 
 const MyWinningContests = () => {
     const [showWithdrawModal, setShowWithdrawModal] = useState(false);
     const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [showStripeForm, setShowStripeForm] = useState(false);
     const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
@@ -21,19 +127,7 @@ const MyWinningContests = () => {
     const winnings = data?.winnings || [];
     const summary = data?.summary || { totalWinnings: 0, balance: 0, totalEarnings: 0, contestsWon: 0 };
 
-    const withdrawMutation = useMutation({
-        mutationFn: ({ amount, method }) => paymentsAPI.withdraw(amount, method),
-        onSuccess: (response) => {
-            toast.success('Withdrawal request submitted!');
-            setShowWithdrawModal(false);
-            queryClient.invalidateQueries(['winning-contests']);
-        },
-        onError: (error) => {
-            toast.error(error.response?.data?.message || 'Withdrawal failed');
-        },
-    });
-
-    const handleWithdraw = () => {
+    const handleWithdrawClick = async () => {
         const amount = parseFloat(withdrawAmount);
         if (isNaN(amount) || amount < 10) {
             toast.error('Minimum withdrawal is $10');
@@ -43,7 +137,43 @@ const MyWinningContests = () => {
             toast.error('Insufficient balance');
             return;
         }
-        withdrawMutation.mutate({ amount, method: 'stripe' });
+
+        const result = await Swal.fire({
+            title: 'Withdraw Funds?',
+            html: `
+                <div style="text-align: left; padding: 10px 0;">
+                    <p style="margin-bottom: 10px;"><strong>Amount:</strong> $${amount.toLocaleString()}</p>
+                    <p style="margin-bottom: 10px;"><strong>Available Balance:</strong> $${summary.balance.toLocaleString()}</p>
+                    <p style="margin-bottom: 10px;"><strong>After Withdrawal:</strong> $${(summary.balance - amount).toLocaleString()}</p>
+                </div>
+                <p style="color: #6b7280; font-size: 14px;">You will be redirected to enter card details for verification.</p>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#6366f1',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Continue to Verification',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (result.isConfirmed) {
+            setShowStripeForm(true);
+        }
+    };
+
+    const handleWithdrawSuccess = (data) => {
+        setShowWithdrawModal(false);
+        setShowStripeForm(false);
+        const amount = withdrawAmount;
+        setWithdrawAmount('');
+        queryClient.invalidateQueries(['winning-contests']);
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Withdrawal Successful!',
+            html: `<p>Your withdrawal of <strong>$${amount}</strong> has been processed.</p><p class="text-sm text-gray-500 mt-2">New balance: $${data.newBalance}</p>`,
+            confirmButtonColor: '#6366f1',
+        });
     };
 
     const getRankBadge = (rank) => {
@@ -189,65 +319,76 @@ const MyWinningContests = () => {
 
             {/* Withdraw Modal */}
             {showWithdrawModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-[var(--bg-primary)] rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[var(--bg-secondary)] rounded-2xl p-6 max-w-md w-full shadow-xl">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-[var(--text-primary)]">Withdraw Funds</h2>
+                            <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                                {showStripeForm ? 'Complete Withdrawal' : 'Withdraw Funds'}
+                            </h2>
                             <button
-                                onClick={() => setShowWithdrawModal(false)}
-                                className="p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors"
+                                onClick={() => {
+                                    setShowWithdrawModal(false);
+                                    setShowStripeForm(false);
+                                    setWithdrawAmount('');
+                                }}
+                                className="p-2 hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors"
                             >
                                 <HiX className="w-5 h-5 text-[var(--text-secondary)]" />
                             </button>
                         </div>
                         
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-sm text-[var(--text-secondary)] mb-1">Available Balance</p>
-                                <p className="text-2xl font-bold text-emerald-500">${summary.balance.toLocaleString()}</p>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                    Withdrawal Amount
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">$</span>
-                                    <input
-                                        type="number"
-                                        min="10"
-                                        max={summary.balance}
-                                        value={withdrawAmount}
-                                        onChange={(e) => setWithdrawAmount(e.target.value)}
-                                        placeholder="Enter amount"
-                                        className="w-full pl-8 pr-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-[var(--text-primary)]"
-                                    />
+                        {!showStripeForm ? (
+                            <div className="space-y-4">
+                                <div className="bg-[var(--bg-tertiary)] rounded-xl p-4">
+                                    <p className="text-sm text-[var(--text-secondary)] mb-1">Available Balance</p>
+                                    <p className="text-3xl font-bold text-emerald-500">${summary.balance.toLocaleString()}</p>
                                 </div>
-                                <p className="text-xs text-[var(--text-secondary)] mt-1">Minimum: $10</p>
-                            </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                        Withdrawal Amount
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">$</span>
+                                        <input
+                                            type="number"
+                                            min="10"
+                                            max={summary.balance}
+                                            value={withdrawAmount}
+                                            onChange={(e) => setWithdrawAmount(e.target.value)}
+                                            placeholder="Enter amount"
+                                            className="w-full pl-8 pr-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-[var(--text-primary)]"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-[var(--text-secondary)] mt-1">Minimum: $10</p>
+                                </div>
 
-                            <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/20 rounded-xl p-4">
-                                <p className="text-sm text-amber-700 dark:text-amber-400">
-                                    Withdrawals are processed via Stripe and typically take 2-3 business days.
-                                </p>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => setShowWithdrawModal(false)}
+                                        className="flex-1 px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--bg-primary)] transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleWithdrawClick}
+                                        disabled={!withdrawAmount || parseFloat(withdrawAmount) < 10}
+                                        className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50"
+                                    >
+                                        Continue
+                                    </button>
+                                </div>
                             </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    onClick={() => setShowWithdrawModal(false)}
-                                    className="flex-1 px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleWithdraw}
-                                    disabled={withdrawMutation.isPending}
-                                    className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50"
-                                >
-                                    {withdrawMutation.isPending ? 'Processing...' : 'Withdraw'}
-                                </button>
-                            </div>
-                        </div>
+                        ) : (
+                            <Elements stripe={stripePromise}>
+                                <WithdrawForm
+                                    amount={parseFloat(withdrawAmount)}
+                                    balance={summary.balance}
+                                    onSuccess={handleWithdrawSuccess}
+                                    onCancel={() => setShowStripeForm(false)}
+                                />
+                            </Elements>
+                        )}
                     </div>
                 </div>
             )}

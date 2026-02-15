@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { HiUsers, HiClock, HiArrowRight, HiStar, HiCheckCircle } from 'react-icons/hi';
+import { HiUsers, HiClock, HiArrowRight, HiStar, HiCheckCircle, HiCalendar } from 'react-icons/hi';
 import { HiTrophy } from 'react-icons/hi2';
 
 const ContestCard = ({ contest, showWinners = false }) => {
@@ -11,35 +11,60 @@ const ContestCard = ({ contest, showWinners = false }) => {
     contestType,
     participantsCount,
     deadline,
+    startDate,
     prizeMoney,
     status,
     winners,
   } = contest;
 
-  // Format deadline
-  const formatDeadline = (date) => {
-    const d = new Date(date);
+  // Check if contest is upcoming (hasn't started yet)
+  const isUpcoming = startDate && new Date(startDate) > new Date();
+  
+  // Format time display based on contest status
+  const formatTimeDisplay = () => {
     const now = new Date();
+    
+    // If contest hasn't started yet, show "Starts in X"
+    if (isUpcoming) {
+      const start = new Date(startDate);
+      const diff = start - now;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      
+      if (days > 7) {
+        return { text: `Starts ${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, icon: 'calendar', color: 'text-blue-500' };
+      } else if (days > 0) {
+        return { text: `Starts in ${days}d ${hours}h`, icon: 'calendar', color: 'text-blue-500' };
+      } else if (hours > 0) {
+        return { text: `Starts in ${hours}h`, icon: 'calendar', color: 'text-blue-500' };
+      } else {
+        return { text: 'Starting soon', icon: 'calendar', color: 'text-blue-500' };
+      }
+    }
+    
+    // Contest has started - show deadline countdown
+    const d = new Date(deadline);
     const diff = d - now;
     
     if (diff < 0) {
-      return 'Ended';
+      return { text: 'Ended', icon: 'check', color: 'text-gray-500' };
     }
     
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     
     if (days > 7) {
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return { text: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), icon: 'clock', color: 'text-[var(--text-muted)]' };
     } else if (days > 0) {
-      return `${days}d ${hours}h left`;
+      return { text: `${days}d ${hours}h left`, icon: 'clock', color: days <= 1 ? 'text-red-500' : 'text-orange-500' };
     } else if (hours > 0) {
-      return `${hours}h left`;
+      return { text: `${hours}h left`, icon: 'clock', color: 'text-red-500' };
     } else {
-      return 'Ending soon';
+      return { text: 'Ending soon', icon: 'clock', color: 'text-red-500' };
     }
   };
 
+  const timeDisplay = formatTimeDisplay();
   const isEnded = new Date(deadline) < new Date() || status === 'completed';
 
   const getCategoryColor = (cat) => {
@@ -92,9 +117,15 @@ const ContestCard = ({ contest, showWinners = false }) => {
           <span className={`px-3 py-1 text-xs font-medium rounded-full ${getCategoryColor(contestType)}`}>
             {contestType}
           </span>
-          <div className={`flex items-center gap-1 text-sm ${isEnded ? 'text-gray-500' : 'text-[var(--text-muted)]'}`}>
-            <HiClock className="w-4 h-4" />
-            <span>{formatDeadline(deadline)}</span>
+          <div className={`flex items-center gap-1 text-sm ${timeDisplay.color}`}>
+            {timeDisplay.icon === 'calendar' ? (
+              <HiCalendar className="w-4 h-4" />
+            ) : timeDisplay.icon === 'check' ? (
+              <HiCheckCircle className="w-4 h-4" />
+            ) : (
+              <HiClock className="w-4 h-4" />
+            )}
+            <span>{timeDisplay.text}</span>
           </div>
         </div>
 

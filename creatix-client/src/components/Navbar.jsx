@@ -10,7 +10,8 @@ const Navbar = () => {
   const [profileDropdown, setProfileDropdown] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { dbUser, logout, isAuthenticated, loading } = useAuth();
-  const dropdownRef = useRef(null);
+  const desktopProfileRef = useRef(null);
+  const mobileProfileRef = useRef(null);
   const navDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -23,7 +24,9 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const isInsideDesktopProfile = desktopProfileRef.current?.contains(event.target);
+      const isInsideMobileProfile = mobileProfileRef.current?.contains(event.target);
+      if (!isInsideDesktopProfile && !isInsideMobileProfile) {
         setProfileDropdown(false);
       }
       if (navDropdownRef.current && !navDropdownRef.current.contains(event.target)) {
@@ -121,7 +124,7 @@ const Navbar = () => {
               <div className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] animate-pulse" />
             ) : isAuthenticated && dbUser ? (
               /* Profile Dropdown */
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative" ref={desktopProfileRef}>
                 <button
                   onClick={() => setProfileDropdown(!profileDropdown)}
                   className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
@@ -296,7 +299,7 @@ const Navbar = () => {
             {loading ? (
               <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] animate-pulse" />
             ) : isAuthenticated && dbUser ? (
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative" ref={mobileProfileRef}>
                 <button
                   onClick={() => setProfileDropdown(!profileDropdown)}
                   className="flex items-center gap-1 p-1.5 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-color)]"

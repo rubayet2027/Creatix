@@ -262,4 +262,53 @@ router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
     }
 });
 
+// Ban user (Admin only)
+router.patch('/:id/ban', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Don't allow banning admin users
+        if (user.role === 'admin') {
+            return res.status(403).json({ message: 'Cannot ban admin users' });
+        }
+
+        user.status = 'banned';
+        await user.save();
+
+        res.json({ 
+            message: 'User banned successfully',
+            user 
+        });
+    } catch (error) {
+        console.error('Ban user error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Unban user (Admin only)
+router.patch('/:id/unban', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.status = 'active';
+        await user.save();
+
+        res.json({ 
+            message: 'User unbanned successfully',
+            user 
+        });
+    } catch (error) {
+        console.error('Unban user error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 export default router;

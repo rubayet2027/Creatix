@@ -18,6 +18,8 @@ export const usersAPI = {
     rejectCreator: (id) => api.patch(`/users/${id}/reject-creator`),
     getPendingCreatorRequests: () => api.get('/users/creator-requests/pending'),
     delete: (id) => api.delete(`/users/${id}`),
+    ban: (id) => api.patch(`/users/${id}/ban`),
+    unban: (id) => api.patch(`/users/${id}/unban`),
 };
 
 // Contests API

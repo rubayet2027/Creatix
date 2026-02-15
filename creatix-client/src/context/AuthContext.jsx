@@ -177,11 +177,21 @@ export const AuthProvider = ({ children }) => {
 
     // Listen for auth state changes with improved persistence
     useEffect(() => {
+        let isMounted = true;
+        
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (!isMounted) return;
+            
             setUser(firebaseUser);
 
             if (firebaseUser) {
                 try {
+                    // Wait a small delay to ensure Firebase is fully ready
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // Ensure we can get a token before making API calls
+                    await firebaseUser.getIdToken(true);
+                    
                     // ALWAYS fetch fresh user data from backend on auth state change
                     // This ensures role/permissions are always up-to-date
                     await refreshUser();
@@ -189,20 +199,25 @@ export const AuthProvider = ({ children }) => {
                     console.error('Failed to refresh user on auth change:', error);
                     // Fallback to stored user if available
                     const storedUser = localStorage.getItem('user');
-                    if (storedUser) {
+                    if (storedUser && isMounted) {
                         setDbUser(JSON.parse(storedUser));
                     }
                 }
             } else {
-                setDbUser(null);
-                localStorage.removeItem('user');
+                if (isMounted) {
+                    setDbUser(null);
+                    localStorage.removeItem('user');
+                }
             }
 
             setLoading(false);
             setAuthChecked(true);
         });
 
-        return () => unsubscribe();
+        return () => {
+            isMounted = false;
+            unsubscribe();
+        };
     }, [refreshUser]);
 
     const value = {

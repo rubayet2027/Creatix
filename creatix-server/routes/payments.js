@@ -17,9 +17,10 @@ const getStripe = () => {
 };
 
 // Create payment intent
+// SECURITY: Added idempotency key support for Stripe
 router.post('/create-intent', verifyToken, async (req, res) => {
     try {
-        const { contestId } = req.body;
+        const { contestId, idempotencyKey } = req.body;
 
         const contest = await Contest.findById(contestId);
         if (!contest) {
@@ -40,6 +41,32 @@ router.post('/create-intent', verifyToken, async (req, res) => {
             return res.status(400).json({ message: 'Contest registration has ended' });
         }
 
+        // Check for existing payment intent for this user & contest
+        const existingPayment = await Payment.findOne({
+            contest: contestId,
+            user: req.user._id,
+            status: 'pending',
+        });
+
+        if (existingPayment && existingPayment.stripePaymentIntentId) {
+            // Return existing payment intent
+            const stripe = getStripe();
+            if (stripe) {
+                try {
+                    const paymentIntent = await stripe.paymentIntents.retrieve(existingPayment.stripePaymentIntentId);
+                    if (paymentIntent.status !== 'succeeded' && paymentIntent.status !== 'canceled') {
+                        return res.json({
+                            clientSecret: paymentIntent.client_secret,
+                            amount: contest.price,
+                            existingPayment: true,
+                        });
+                    }
+                } catch (e) {
+                    // Payment intent not found, create new one
+                }
+            }
+        }
+
         const stripe = getStripe();
         if (!stripe) {
             // If Stripe is not configured, allow free registration for testing
@@ -50,15 +77,20 @@ router.post('/create-intent', verifyToken, async (req, res) => {
             });
         }
 
-        // Create Stripe payment intent
-        const paymentIntent = await stripe.paymentIntents.create({
+        // SECURITY: Create Stripe payment intent with idempotency key
+        const stripeOptions = {
             amount: Math.round(contest.price * 100), // Stripe uses cents
             currency: 'usd',
             metadata: {
                 contestId: contest._id.toString(),
                 userId: req.user._id.toString(),
             },
-        });
+        };
+
+        // Add idempotency key if provided
+        const requestOptions = idempotencyKey ? { idempotencyKey: `intent_${idempotencyKey}` } : {};
+        
+        const paymentIntent = await stripe.paymentIntents.create(stripeOptions, requestOptions);
 
         // Save payment record
         await Payment.create({
@@ -226,17 +258,76 @@ router.get('/winnings', verifyToken, async (req, res) => {
 });
 
 // Withdraw winnings
+// SECURITY: Added idempotency check and race condition protection
 router.post('/withdraw', verifyToken, async (req, res) => {
     try {
-        const { amount, method, accountDetails } = req.body;
+        const { amount, method, accountDetails, idempotencyKey } = req.body;
 
-        const user = await User.findById(req.user._id);
-        
-        if (!user.balance || user.balance < amount) {
-            return res.status(400).json({ message: 'Insufficient balance' });
+        // SECURITY: Require idempotency key for withdrawals to prevent double-spend
+        if (!idempotencyKey) {
+            return res.status(400).json({ message: 'Idempotency key is required for withdrawals' });
+        }
+
+        // Check if this idempotency key was already used
+        const existingWithdrawal = await Payment.findOne({
+            user: req.user._id,
+            type: 'withdrawal',
+            idempotencyKey: idempotencyKey,
+        });
+
+        if (existingWithdrawal) {
+            // Return the existing withdrawal result
+            return res.json({
+                message: 'Withdrawal already processed',
+                newBalance: (await User.findById(req.user._id)).balance,
+                status: existingWithdrawal.status,
+                paymentId: existingWithdrawal._id,
+                duplicate: true,
+            });
+        }
+
+        // SECURITY: Check for pending withdrawals to prevent race conditions
+        const pendingWithdrawal = await Payment.findOne({
+            user: req.user._id,
+            type: 'withdrawal',
+            status: 'pending',
+            createdAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) }, // Last 5 minutes
+        });
+
+        if (pendingWithdrawal) {
+            return res.status(429).json({ 
+                message: 'You have a pending withdrawal. Please wait for it to complete.',
+                pendingId: pendingWithdrawal._id
+            });
+        }
+
+        // Use MongoDB atomic operation to prevent race conditions
+        const user = await User.findOneAndUpdate(
+            { 
+                _id: req.user._id, 
+                balance: { $gte: amount }, // Only proceed if balance is sufficient
+            },
+            { 
+                $inc: { balance: -amount } // Atomically deduct balance
+            },
+            { new: true }
+        );
+
+        if (!user) {
+            // Either user not found or insufficient balance
+            const currentUser = await User.findById(req.user._id);
+            if (!currentUser) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            return res.status(400).json({ 
+                message: 'Insufficient balance',
+                currentBalance: currentUser.balance
+            });
         }
 
         if (amount < 10) {
+            // Refund the deducted amount
+            await User.findByIdAndUpdate(req.user._id, { $inc: { balance: amount } });
             return res.status(400).json({ message: 'Minimum withdrawal amount is $10' });
         }
 
@@ -268,7 +359,7 @@ router.post('/withdraw', verifyToken, async (req, res) => {
             stripePayoutId = `payout_test_${Date.now()}`;
         }
 
-        // Create withdrawal payment record
+        // Create withdrawal payment record with idempotency key
         const payment = await Payment.create({
             user: req.user._id,
             contest: null,
@@ -282,11 +373,8 @@ router.post('/withdraw', verifyToken, async (req, res) => {
                 accountHolder: accountDetails.accountHolder,
             } : null,
             stripePayoutId,
+            idempotencyKey, // Store for duplicate detection
         });
-
-        // Deduct from user balance
-        user.balance -= amount;
-        await user.save();
 
         res.json({
             message: payoutStatus === 'completed' 
@@ -300,6 +388,74 @@ router.post('/withdraw', verifyToken, async (req, res) => {
         console.error('Withdraw error:', error);
         res.status(500).json({ message: 'Server error' });
     }
+});
+
+// SECURITY: Stripe webhook endpoint with signature verification
+// This endpoint must be added BEFORE express.json() middleware in the main app
+// Configure webhook endpoint in Stripe dashboard: /api/payments/webhook
+router.post('/webhook', async (req, res) => {
+    const stripe = getStripe();
+    if (!stripe) {
+        return res.status(503).json({ message: 'Stripe not configured' });
+    }
+
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+        console.error('STRIPE_WEBHOOK_SECRET not configured');
+        return res.status(503).json({ message: 'Webhook secret not configured' });
+    }
+
+    let event;
+
+    try {
+        // SECURITY: Verify webhook signature to ensure request is from Stripe
+        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).json({ message: `Webhook Error: ${err.message}` });
+    }
+
+    // Handle the event
+    switch (event.type) {
+        case 'payment_intent.succeeded':
+            const paymentIntent = event.data.object;
+            console.log('PaymentIntent succeeded:', paymentIntent.id);
+            
+            // Update payment record
+            await Payment.findOneAndUpdate(
+                { stripePaymentIntentId: paymentIntent.id },
+                { status: 'succeeded' }
+            );
+            break;
+
+        case 'payment_intent.payment_failed':
+            const failedIntent = event.data.object;
+            console.log('PaymentIntent failed:', failedIntent.id);
+            
+            await Payment.findOneAndUpdate(
+                { stripePaymentIntentId: failedIntent.id },
+                { status: 'failed' }
+            );
+            break;
+
+        case 'charge.refunded':
+            const refund = event.data.object;
+            console.log('Charge refunded:', refund.payment_intent);
+            
+            await Payment.findOneAndUpdate(
+                { stripePaymentIntentId: refund.payment_intent },
+                { status: 'refunded' }
+            );
+            break;
+
+        default:
+            console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    // Return 200 to acknowledge receipt
+    res.json({ received: true });
 });
 
 export default router;

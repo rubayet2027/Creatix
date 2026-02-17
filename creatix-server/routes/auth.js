@@ -6,13 +6,31 @@ import { verifyToken } from '../middlewares/auth.js';
 const router = express.Router();
 
 // Sync user data from Firebase to database (called after Firebase auth)
+// SECURITY: Now verifies Firebase token before trusting any user data
 router.post('/sync', async (req, res) => {
     try {
-        const { firebaseUid, email, name, photo, bio, address, creatorRequest } = req.body;
-
-        if (!firebaseUid || !email) {
-            return res.status(400).json({ message: 'Firebase UID and email are required' });
+        // SECURITY FIX: Extract and verify Firebase token from Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Authorization token required' });
         }
+        
+        const token = authHeader.split(' ')[1];
+        let decodedToken;
+        
+        try {
+            decodedToken = await auth.verifyIdToken(token);
+        } catch (tokenError) {
+            console.error('Token verification failed in sync:', tokenError.message);
+            return res.status(401).json({ message: 'Invalid or expired token' });
+        }
+        
+        // Now we trust the decoded token, not the request body for critical fields
+        const firebaseUid = decodedToken.uid;
+        const email = decodedToken.email;
+        
+        // Get additional data from body (name, photo, etc.) but NOT firebaseUid or email
+        const { name, photo, bio, address, creatorRequest } = req.body;
 
         // Find or create user
         let user = await User.findOne({ firebaseUid });

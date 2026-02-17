@@ -44,6 +44,13 @@ const paymentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Mixed,
         default: null,
     },
+    // SECURITY: Idempotency key to prevent duplicate transactions
+    idempotencyKey: {
+        type: String,
+        default: null,
+        sparse: true,
+        index: true,
+    },
 }, {
     timestamps: true,
 });

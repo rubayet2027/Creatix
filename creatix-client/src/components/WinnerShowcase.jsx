@@ -77,7 +77,7 @@ const WinnerShowcase = () => {
             </span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-            Recent Winners
+            Top Winners
           </h2>
           <p className="text-lg text-secondary-300">
             Meet the talented creators who conquered our challenges. Your name
@@ -125,7 +125,7 @@ const WinnerShowcase = () => {
                 variants={itemVariants}
                 key={leader._id}
                 viewport={{ once: true }}
-                className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-6 sm:p-8 hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1"
+                className="group relative bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/20 hover:-translate-y-1"
                 role="listitem"
               >
                 {/* Trophy Icon */}
@@ -165,22 +165,22 @@ const WinnerShowcase = () => {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-white group-hover:text-primary-300 transition-colors truncate">{leader.name || 'Winner'}</h3>
-                    <p className="text-sm text-secondary-400 truncate">Top Performer</p>
+                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors truncate">{leader.name || 'Winner'}</h3>
+                    <p className="text-sm text-gray-500 truncate">Top Performer</p>
                   </div>
                 </div>
 
                 {/* Contest & Prize */}
-                <div className="flex items-center justify-between mb-6 py-4 border-y border-white/10">
+                <div className="flex items-center justify-between mb-6 py-4 border-y border-gray-100">
                   <div>
-                    <p className="text-xs text-secondary-400 mb-1">Contests Won</p>
-                    <p className="text-sm font-medium text-white line-clamp-1">
+                    <p className="text-xs text-gray-500 mb-1">Contests Won</p>
+                    <p className="text-sm font-bold text-gray-900 line-clamp-1">
                       {leader.contestsWon || 0}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-secondary-400 mb-1">Points</p>
-                    <p className="text-xl font-bold text-emerald-400">
+                    <p className="text-xs text-gray-500 mb-1">Points</p>
+                    <p className="text-xl font-bold text-emerald-600">
                       {leader.points?.toLocaleString() || '0'}
                     </p>
                   </div>
@@ -192,7 +192,7 @@ const WinnerShowcase = () => {
                     className="absolute -top-2 -left-2 w-6 h-6 text-primary-400/30"
                     aria-hidden="true"
                   />
-                  <p className="text-secondary-300 text-sm italic leading-relaxed pl-4 line-clamp-2">
+                  <p className="text-gray-600 text-sm italic leading-relaxed pl-4 line-clamp-2">
                     &ldquo;{leader.name} has consistently dominated the leaderboards with {leader.contestsWon} wins.&rdquo;
                   </p>
                 </div>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { HiUsers, HiGlobeAlt, HiChartBar, HiStar } from 'react-icons/hi';
 import { HiTrophy, HiBolt } from 'react-icons/hi2';
+import { motion } from 'framer-motion';
 import { statsAPI } from '../api';
 import Section from './layout/Section';
 import Container from './layout/Container';
@@ -124,6 +125,23 @@ const Stats = () => {
     return colors[color] || colors.primary;
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 100 },
+    },
+  };
+
   // Intersection Observer for animation trigger
   useEffect(() => {
     const currentRef = sectionRef.current;
@@ -159,7 +177,12 @@ const Stats = () => {
 
       <Container>
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 relative">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center max-w-3xl mx-auto mb-16 relative"
+        >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-6">
             <HiChartBar className="w-4 h-4 text-primary-500" aria-hidden="true" />
             <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
@@ -173,10 +196,14 @@ const Stats = () => {
             Join a thriving ecosystem of creative professionals who trust
             Creatix to showcase their talents and win rewards.
           </p>
-        </div>
+        </motion.div>
 
         {/* Stats Grid */}
-        <div
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-16 relative"
           role="list"
           aria-label="Platform statistics"
@@ -185,9 +212,11 @@ const Stats = () => {
             const colors = getColorClasses(stat.color);
             const IconComponent = stat.icon;
             return (
-              <div
+              <motion.div
+                variants={itemVariants}
                 key={stat.label}
-                className="group relative bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] p-8 hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/5 overflow-hidden"
+                viewport={{ once: true }}
+                className="group relative bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] p-8 hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/5 overflow-hidden hover:-translate-y-1"
                 role="listitem"
               >
                 {/* Background Gradient */}
@@ -226,40 +255,73 @@ const Stats = () => {
                   className={`absolute bottom-4 right-4 w-8 h-8 border-2 ${colors.border} rounded-lg rotate-45 opacity-50 group-hover:rotate-90 transition-transform duration-500 pointer-events-none`}
                   aria-hidden="true"
                 />
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
-        {/* Trust Badges */}
-        <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] p-8 lg:p-12 relative">
-          <div className="text-center mb-8">
-            <p className="text-[var(--text-secondary)]">
-              Trusted by creators from top companies
+        {/* Trust Badges & Trustpilot */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] p-8 lg:p-12 relative flex flex-col lg:flex-row items-center gap-10 lg:gap-16 justify-between"
+        >
+          {/* Trustpilot Section */}
+          <div className="flex flex-col items-center lg:items-start shrink-0">
+            <div className="flex items-center gap-2 mb-2">
+              <HiStar className="w-8 h-8 text-[#00b67a]" />
+              <span className="text-2xl font-bold text-[var(--text-primary)]">Trustpilot</span>
+            </div>
+            <div className="flex gap-1 mb-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-8 h-8 bg-[#00b67a] flex items-center justify-center rounded-sm">
+                  <HiStar className="w-5 h-5 text-white" />
+                </div>
+              ))}
+            </div>
+            <p className="text-[var(--text-secondary)] font-medium">
+              TrustScore <span className="font-bold text-[var(--text-primary)]">4.8</span> | <span className="underline cursor-pointer hover:text-[var(--text-primary)]">147 reviews</span>
             </p>
           </div>
-          <ul
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-8"
-            aria-label="Trusted companies"
-          >
-            {['Google', 'Adobe', 'Spotify', 'Airbnb', 'Netflix', 'Slack'].map(
-              (company) => (
+
+          <div className="w-full h-px lg:w-px lg:h-24 bg-[var(--border-color)] hidden sm:block"></div>
+
+          {/* Companies Section */}
+          <div className="flex-1 w-full">
+            <div className="text-center lg:text-left mb-6">
+              <p className="text-[var(--text-secondary)] font-medium">
+                Trusted by creators from top companies
+              </p>
+            </div>
+            <ul
+              className="flex flex-wrap justify-center lg:justify-start items-center gap-8 lg:gap-12"
+              aria-label="Trusted companies"
+            >
+              {[
+                { name: 'Google', icon: 'google' },
+                { name: 'Adobe', icon: 'adobe' },
+                { name: 'Spotify', icon: 'spotify' },
+                { name: 'Airbnb', icon: 'airbnb' },
+                { name: 'Netflix', icon: 'netflix' },
+                { name: 'Slack', icon: 'slack' },
+              ].map((company) => (
                 <li
-                  key={company}
-                  className="flex items-center justify-center gap-2 text-[var(--text-primary)] py-2"
+                  key={company.name}
+                  className="group flex flex-col items-center justify-center transition-transform hover:scale-110"
+                  title={company.name}
                 >
-                  <HiStar
-                    className="w-5 h-5 text-primary-500 shrink-0"
-                    aria-hidden="true"
+                  <img
+                    src={`https://cdn.simpleicons.org/${company.icon}/currentColor`}
+                    alt={`${company.name} logo`}
+                    className="h-8 md:h-10 w-auto opacity-50 group-hover:opacity-100 dark:invert transition-opacity duration-300"
                   />
-                  <span className="text-base lg:text-lg font-semibold">
-                    {company}
-                  </span>
                 </li>
-              )
-            )}
-          </ul>
-        </div>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
       </Container>
     </Section>
   );

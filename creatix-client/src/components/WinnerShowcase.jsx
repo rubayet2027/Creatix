@@ -2,13 +2,14 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { HiArrowRight, HiStar, HiCurrencyDollar } from 'react-icons/hi';
 import { HiTrophy, HiSparkles } from 'react-icons/hi2';
+import { motion } from 'framer-motion';
 import { statsAPI } from '../api';
 import Section from './layout/Section';
 import Container from './layout/Container';
 
 const WinnerShowcase = () => {
   // Fetch recent winners from API
-  const { data, isLoading } = useQuery({
+  const { data: winnersData, isLoading: isLoadingWinners } = useQuery({
     queryKey: ['recent-winners'],
     queryFn: async () => {
       const response = await statsAPI.getRecentWinners(3);
@@ -16,14 +17,41 @@ const WinnerShowcase = () => {
     },
   });
 
-  const winners = data || [];
+  // Fetch platform stats for the highlight section
+  const { data: platformStats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['platform-stats'],
+    queryFn: async () => {
+      const response = await statsAPI.getPlatform();
+      return response.data?.data || response.data;
+    },
+  });
+
+  const winners = winnersData || [];
+  const isLoading = isLoadingWinners || isLoadingStats;
 
   const stats = [
-    { icon: HiCurrencyDollar, value: '$2.5M+', label: 'Total Prizes Awarded' },
-    { icon: HiTrophy, value: '5,000+', label: 'Winners Crowned' },
+    { icon: HiCurrencyDollar, value: `$${Math.round((platformStats?.totalPrizesDistributed || 0) / 1000)}K+`, label: 'Total Prizes Awarded' },
+    { icon: HiTrophy, value: `${(platformStats?.totalUsers || 0).toLocaleString()}+`, label: 'Total Creators' },
     { icon: HiStar, value: '98%', label: 'Winner Satisfaction' },
-    { icon: HiSparkles, value: '150+', label: 'Countries Represented' },
+    { icon: HiSparkles, value: `${platformStats?.totalContests || 0}+`, label: 'Total Contests' },
   ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 100 },
+    },
+  };
 
   return (
     <Section className="relative overflow-hidden">
@@ -45,7 +73,12 @@ const WinnerShowcase = () => {
 
       <Container className="relative">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center max-w-3xl mx-auto mb-16"
+        >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
             <HiTrophy className="w-4 h-4 text-amber-400" aria-hidden="true" />
             <span className="text-sm font-medium text-amber-300">
@@ -59,7 +92,7 @@ const WinnerShowcase = () => {
             Meet the talented creators who conquered our challenges. Your name
             could be next on this list.
           </p>
-        </div>
+        </motion.div>
 
         {/* Winners Grid */}
         {isLoading ? (
@@ -87,20 +120,26 @@ const WinnerShowcase = () => {
             <p className="text-secondary-300">No winners to display yet. Be the first!</p>
           </div>
         ) : (
-          <div
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-16"
             role="list"
             aria-label="Recent contest winners"
           >
             {winners.map((contest, index) => (
-              <article
+              <motion.article
+                variants={itemVariants}
                 key={contest._id}
-                className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-6 sm:p-8 hover:border-primary-500/30 transition-all duration-300"
+                viewport={{ once: true }}
+                className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-6 sm:p-8 hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1"
                 role="listitem"
               >
                 {/* Trophy Icon */}
                 <div
-                  className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30"
+                  className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:rotate-12 transition-transform duration-300 z-10"
                   aria-hidden="true"
                 >
                   <HiTrophy className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -116,7 +155,7 @@ const WinnerShowcase = () => {
                         <img
                           src={contest.winner.photo}
                           alt={contest.winner.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
                         contest.winner?.name
@@ -135,8 +174,8 @@ const WinnerShowcase = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">{contest.winner?.name || 'Winner'}</h3>
-                    <p className="text-sm text-secondary-400">{contest.contestType}</p>
+                    <h3 className="text-lg font-bold text-white group-hover:text-primary-300 transition-colors">{contest.winner?.name || 'Winner'}</h3>
+                    <p className="text-sm text-secondary-400">{contest.contestType || 'Challenge'}</p>
                   </div>
                 </div>
 
@@ -144,14 +183,14 @@ const WinnerShowcase = () => {
                 <div className="flex items-center justify-between mb-6 py-4 border-y border-white/10">
                   <div>
                     <p className="text-xs text-secondary-400 mb-1">Contest Won</p>
-                    <p className="text-sm font-medium text-white line-clamp-1">
-                      {contest.name}
+                    <p className="text-sm font-medium text-white line-clamp-1" title={contest.name}>
+                      {contest.name?.substring(0, 30)}...
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-secondary-400 mb-1">Prize Won</p>
                     <p className="text-xl font-bold text-emerald-400">
-                      ${contest.prizeMoney?.toLocaleString()}
+                      ${contest.prizeMoney?.toLocaleString() || '0'}
                     </p>
                   </div>
                 </div>
@@ -172,13 +211,19 @@ const WinnerShowcase = () => {
                   className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary-500/0 to-primary-500/0 group-hover:from-primary-500/5 group-hover:to-transparent transition-all duration-300 pointer-events-none"
                   aria-hidden="true"
                 />
-              </article>
+              </motion.article>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Stats Highlight */}
-        <div className="bg-gradient-to-r from-primary-600/20 via-primary-500/10 to-primary-600/20 rounded-3xl border border-primary-500/20 p-8 lg:p-12">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          className="bg-gradient-to-r from-primary-600/20 via-primary-500/10 to-primary-600/20 rounded-3xl border border-primary-500/20 p-8 lg:p-12"
+        >
           <div
             className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
             role="list"
@@ -202,10 +247,16 @@ const WinnerShowcase = () => {
               );
             })}
           </div>
-        </div>
+        </motion.div>
 
         {/* CTA */}
-        <div className="text-center mt-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="text-center mt-12"
+        >
           <p className="text-secondary-300 mb-6">
             Ready to join our growing list of champions?
           </p>
@@ -225,7 +276,7 @@ const WinnerShowcase = () => {
               View Leaderboard
             </Link>
           </div>
-        </div>
+        </motion.div>
       </Container>
     </Section>
   );

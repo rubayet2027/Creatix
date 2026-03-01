@@ -21,6 +21,14 @@ const Contact = lazy(() => import('../pages/Contact'));
 const Blog = lazy(() => import('../pages/Blog'));
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
 const Terms = lazy(() => import('../pages/Terms'));
+const Pricing = lazy(() => import('../pages/Pricing'));
+const Careers = lazy(() => import('../pages/Careers'));
+const PressKit = lazy(() => import('../pages/PressKit'));
+const HelpCenter = lazy(() => import('../pages/HelpCenter'));
+const FaqsPage = lazy(() => import('../pages/FaqsPage'));
+const Community = lazy(() => import('../pages/Community'));
+const CookiePolicy = lazy(() => import('../pages/CookiePolicy'));
+const ContestRules = lazy(() => import('../pages/ContestRules'));
 
 // Dashboard Pages (lazy loaded)
 const DashboardHome = lazy(() => import('../pages/dashboard/DashboardHome'));
@@ -105,6 +113,38 @@ const router = createBrowserRouter([
       {
         path: 'terms',
         element: <LazyPage><Terms /></LazyPage>,
+      },
+      {
+        path: 'pricing',
+        element: <LazyPage><Pricing /></LazyPage>,
+      },
+      {
+        path: 'careers',
+        element: <LazyPage><Careers /></LazyPage>,
+      },
+      {
+        path: 'press',
+        element: <LazyPage><PressKit /></LazyPage>,
+      },
+      {
+        path: 'help',
+        element: <LazyPage><HelpCenter /></LazyPage>,
+      },
+      {
+        path: 'faqs',
+        element: <LazyPage><FaqsPage /></LazyPage>,
+      },
+      {
+        path: 'community',
+        element: <LazyPage><Community /></LazyPage>,
+      },
+      {
+        path: 'cookies',
+        element: <LazyPage><CookiePolicy /></LazyPage>,
+      },
+      {
+        path: 'rules',
+        element: <LazyPage><ContestRules /></LazyPage>,
       },
     ],
   },

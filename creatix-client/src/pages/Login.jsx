@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiPlay } from 'react-icons/hi';
 import { FcGoogle } from 'react-icons/fc';
 import { useState } from 'react';
+import Swal from 'sweetalert2';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -48,6 +49,14 @@ const Login = () => {
       const demoPassword = `Demo!${randomId}`;
 
       await registerUser('Demo User', demoEmail, demoPassword);
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Demo Account Created',
+        text: 'You are now logged in as a demo user. Some features may be restricted.',
+        confirmButtonColor: '#0ea5e9', // primary-500
+      });
+
       navigate(from, { replace: true });
     } catch (error) {
       // Error is handled in AuthContext with toast

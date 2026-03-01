@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { useAuth } from '../context/AuthContext';
 import { PageLoader } from './Loader';
 
@@ -14,6 +15,34 @@ export const PrivateRoute = ({ children }) => {
 
     if (!isAuthenticated) {
         return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    return children;
+};
+
+// Route wrapper that blocks demo accounts from performing real actions
+export const NonDemoRoute = ({ children }) => {
+    const { isAuthenticated, loading, authChecked, dbUser } = useAuth();
+    const location = useLocation();
+
+    if (loading || !authChecked) {
+        return <PageLoader />;
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    const isDemoUser = dbUser?.email?.startsWith('demo_');
+    if (isDemoUser) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Action Restricted',
+            text: 'Demo users cannot access this feature. Please sign up for a full account to continue.',
+            confirmButtonText: 'Sign Up',
+            confirmButtonColor: '#0ea5e9'
+        });
+        return <Navigate to="/register" replace />;
     }
 
     return children;

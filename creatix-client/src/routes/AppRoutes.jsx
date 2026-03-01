@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
-import { PrivateRoute, CreatorRoute, AdminRoute, PublicOnlyRoute } from '../components/PrivateRoute';
+import { PrivateRoute, CreatorRoute, AdminRoute, PublicOnlyRoute, NonDemoRoute } from '../components/PrivateRoute';
 import { HomeRoute } from '../components/HomeRoute';
 import Loader from '../components/Loader';
 
@@ -171,84 +171,110 @@ const router = createBrowserRouter([
       },
       {
         path: 'profile',
-        element: <LazyPage><MyProfile /></LazyPage>,
+        element: (
+          <NonDemoRoute>
+            <LazyPage><MyProfile /></LazyPage>
+          </NonDemoRoute>
+        ),
       },
       {
         path: 'apply-creator',
-        element: <LazyPage><ApplyAsCreator /></LazyPage>,
+        element: (
+          <NonDemoRoute>
+            <LazyPage><ApplyAsCreator /></LazyPage>
+          </NonDemoRoute>
+        ),
       },
       // Creator Dashboard Routes
       {
         path: 'add-contest',
         element: (
-          <CreatorRoute>
-            <LazyPage><AddContest /></LazyPage>
-          </CreatorRoute>
+          <NonDemoRoute>
+            <CreatorRoute>
+              <LazyPage><AddContest /></LazyPage>
+            </CreatorRoute>
+          </NonDemoRoute>
         ),
       },
       {
         path: 'my-contests',
         element: (
-          <CreatorRoute>
-            <LazyPage><MyCreatedContests /></LazyPage>
-          </CreatorRoute>
+          <NonDemoRoute>
+            <CreatorRoute>
+              <LazyPage><MyCreatedContests /></LazyPage>
+            </CreatorRoute>
+          </NonDemoRoute>
         ),
       },
       {
         path: 'submissions/:id',
         element: (
-          <CreatorRoute>
-            <LazyPage><ContestSubmissions /></LazyPage>
-          </CreatorRoute>
+          <NonDemoRoute>
+            <CreatorRoute>
+              <LazyPage><ContestSubmissions /></LazyPage>
+            </CreatorRoute>
+          </NonDemoRoute>
         ),
       },
       {
         path: 'edit-contest/:id',
         element: (
-          <CreatorRoute>
-            <LazyPage><EditContest /></LazyPage>
-          </CreatorRoute>
+          <NonDemoRoute>
+            <CreatorRoute>
+              <LazyPage><EditContest /></LazyPage>
+            </CreatorRoute>
+          </NonDemoRoute>
         ),
       },
       // Admin Dashboard Routes
       {
         path: 'manage-users',
         element: (
-          <AdminRoute>
-            <LazyPage><ManageUsers /></LazyPage>
-          </AdminRoute>
+          <NonDemoRoute>
+            <AdminRoute>
+              <LazyPage><ManageUsers /></LazyPage>
+            </AdminRoute>
+          </NonDemoRoute>
         ),
       },
       {
         path: 'manage-contests',
         element: (
-          <AdminRoute>
-            <LazyPage><ManageContests /></LazyPage>
-          </AdminRoute>
+          <NonDemoRoute>
+            <AdminRoute>
+              <LazyPage><ManageContests /></LazyPage>
+            </AdminRoute>
+          </NonDemoRoute>
         ),
       },
       {
         path: 'reports',
         element: (
-          <AdminRoute>
-            <LazyPage><AdminReports /></LazyPage>
-          </AdminRoute>
+          <NonDemoRoute>
+            <AdminRoute>
+              <LazyPage><AdminReports /></LazyPage>
+            </AdminRoute>
+          </NonDemoRoute>
         ),
       },
       {
         path: 'categories',
         element: (
-          <AdminRoute>
-            <LazyPage><AdminCategories /></LazyPage>
-          </AdminRoute>
+          <NonDemoRoute>
+            <AdminRoute>
+              <LazyPage><AdminCategories /></LazyPage>
+            </AdminRoute>
+          </NonDemoRoute>
         ),
       },
       {
         path: 'settings',
         element: (
-          <AdminRoute>
-            <LazyPage><AdminSettings /></LazyPage>
-          </AdminRoute>
+          <NonDemoRoute>
+            <AdminRoute>
+              <LazyPage><AdminSettings /></LazyPage>
+            </AdminRoute>
+          </NonDemoRoute>
         ),
       },
     ],

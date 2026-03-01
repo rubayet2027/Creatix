@@ -57,20 +57,11 @@ const Stats = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
 
-  // Fetch platform stats from API
-  const { data: platformStats } = useQuery({
-    queryKey: ['platform-stats'],
-    queryFn: async () => {
-      const response = await statsAPI.getPlatform();
-      return response.data?.data || response.data;
-    },
-  });
-
   // Build stats array from API data or fallback to defaults
   const stats = [
     {
       icon: HiBolt,
-      value: platformStats?.activeContests || 0,
+      value: 150,
       suffix: '+',
       label: 'Active Contests',
       description: 'Live competitions',
@@ -78,7 +69,7 @@ const Stats = () => {
     },
     {
       icon: HiUsers,
-      value: platformStats?.totalUsers || 0,
+      value: 5000,
       suffix: '+',
       label: 'Users',
       description: 'Creative minds',
@@ -86,7 +77,7 @@ const Stats = () => {
     },
     {
       icon: HiTrophy,
-      value: Math.round((platformStats?.totalPrizesDistributed || 0) / 1000),
+      value: 2500,
       suffix: 'K+',
       label: 'Prizes Distributed',
       description: 'In USD',
@@ -94,7 +85,7 @@ const Stats = () => {
     },
     {
       icon: HiGlobeAlt,
-      value: platformStats?.totalContests || 0,
+      value: 12000,
       suffix: '+',
       label: 'Total Contests',
       description: 'Hosted on platform',

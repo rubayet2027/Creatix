@@ -10,7 +10,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, register: registerUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +43,11 @@ const Login = () => {
   const handleDemoLogin = async () => {
     setIsDemoLoading(true);
     try {
-      await login('demo@creatix.com', 'Demo@1234');
+      const randomId = Math.random().toString(36).substring(2, 10);
+      const demoEmail = `demo_${randomId}@creatix.com`;
+      const demoPassword = `Demo!${randomId}`;
+
+      await registerUser('Demo User', demoEmail, demoPassword);
       navigate(from, { replace: true });
     } catch (error) {
       // Error is handled in AuthContext with toast

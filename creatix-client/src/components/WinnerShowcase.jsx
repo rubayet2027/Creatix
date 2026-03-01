@@ -3,37 +3,28 @@ import { useQuery } from '@tanstack/react-query';
 import { HiArrowRight, HiStar, HiCurrencyDollar } from 'react-icons/hi';
 import { HiTrophy, HiSparkles } from 'react-icons/hi2';
 import { motion } from 'framer-motion';
-import { statsAPI } from '../api';
+import { leaderboardAPI } from '../api';
 import Section from './layout/Section';
 import Container from './layout/Container';
 
 const WinnerShowcase = () => {
-  // Fetch recent winners from API
+  // Fetch top 3 winners from leaderboard
   const { data: winnersData, isLoading: isLoadingWinners } = useQuery({
-    queryKey: ['recent-winners'],
+    queryKey: ['leaderboard-top'],
     queryFn: async () => {
-      const response = await statsAPI.getRecentWinners(3);
-      return response.data?.data || response.data;
-    },
-  });
-
-  // Fetch platform stats for the highlight section
-  const { data: platformStats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['platform-stats'],
-    queryFn: async () => {
-      const response = await statsAPI.getPlatform();
+      const response = await leaderboardAPI.getTop(3);
       return response.data?.data || response.data;
     },
   });
 
   const winners = winnersData || [];
-  const isLoading = isLoadingWinners || isLoadingStats;
+  const isLoading = isLoadingWinners;
 
   const stats = [
-    { icon: HiCurrencyDollar, value: `$${Math.round((platformStats?.totalPrizesDistributed || 0) / 1000)}K+`, label: 'Total Prizes Awarded' },
-    { icon: HiTrophy, value: `${(platformStats?.totalUsers || 0).toLocaleString()}+`, label: 'Total Creators' },
+    { icon: HiCurrencyDollar, value: `$2.5M+`, label: 'Total Prizes Awarded' },
+    { icon: HiTrophy, value: `5,000+`, label: 'Total Creators' },
     { icon: HiStar, value: '98%', label: 'Winner Satisfaction' },
-    { icon: HiSparkles, value: `${platformStats?.totalContests || 0}+`, label: 'Total Contests' },
+    { icon: HiSparkles, value: `12,000+`, label: 'Total Contests' },
   ];
 
   const containerVariants = {
@@ -129,10 +120,10 @@ const WinnerShowcase = () => {
             role="list"
             aria-label="Recent contest winners"
           >
-            {winners.map((contest, index) => (
+            {winners.map((leader, index) => (
               <motion.article
                 variants={itemVariants}
-                key={contest._id}
+                key={leader._id}
                 viewport={{ once: true }}
                 className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-6 sm:p-8 hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1"
                 role="listitem"
@@ -151,14 +142,14 @@ const WinnerShowcase = () => {
                     <div
                       className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-2xl text-white font-bold overflow-hidden"
                     >
-                      {contest.winner?.photo ? (
+                      {leader.photo ? (
                         <img
-                          src={contest.winner.photo}
-                          alt={contest.winner.name}
+                          src={leader.photo}
+                          alt={leader.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
-                        contest.winner?.name
+                        leader.name
                           ?.split(' ')
                           .map((n) => n[0])
                           .join('') || 'W'
@@ -173,24 +164,24 @@ const WinnerShowcase = () => {
                       </span>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white group-hover:text-primary-300 transition-colors">{contest.winner?.name || 'Winner'}</h3>
-                    <p className="text-sm text-secondary-400">{contest.contestType || 'Challenge'}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold text-white group-hover:text-primary-300 transition-colors truncate">{leader.name || 'Winner'}</h3>
+                    <p className="text-sm text-secondary-400 truncate">Top Performer</p>
                   </div>
                 </div>
 
                 {/* Contest & Prize */}
                 <div className="flex items-center justify-between mb-6 py-4 border-y border-white/10">
                   <div>
-                    <p className="text-xs text-secondary-400 mb-1">Contest Won</p>
-                    <p className="text-sm font-medium text-white line-clamp-1" title={contest.name}>
-                      {contest.name?.substring(0, 30)}...
+                    <p className="text-xs text-secondary-400 mb-1">Contests Won</p>
+                    <p className="text-sm font-medium text-white line-clamp-1">
+                      {leader.contestsWon || 0}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-secondary-400 mb-1">Prize Won</p>
+                    <p className="text-xs text-secondary-400 mb-1">Points</p>
                     <p className="text-xl font-bold text-emerald-400">
-                      ${contest.prizeMoney?.toLocaleString() || '0'}
+                      {leader.points?.toLocaleString() || '0'}
                     </p>
                   </div>
                 </div>
@@ -202,7 +193,7 @@ const WinnerShowcase = () => {
                     aria-hidden="true"
                   />
                   <p className="text-secondary-300 text-sm italic leading-relaxed pl-4 line-clamp-2">
-                    &ldquo;Congratulations to {contest.winner?.name || 'our winner'} for winning {contest.name}!&rdquo;
+                    &ldquo;{leader.name} has consistently dominated the leaderboards with {leader.contestsWon} wins.&rdquo;
                   </p>
                 </div>
 

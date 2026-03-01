@@ -6,6 +6,9 @@ import { motion } from 'framer-motion';
 import { statsAPI } from '../api';
 import Section from './layout/Section';
 import Container from './layout/Container';
+import googleLogo from '../assets/Google.png';
+import adobeLogo from '../assets/Adobe.png';
+import slackLogo from '../assets/SLack.png';
 
 // Animated counter component
 const AnimatedCounter = memo(function AnimatedCounter({ value, suffix, isVisible }) {
@@ -300,12 +303,12 @@ const Stats = () => {
               aria-label="Trusted companies"
             >
               {[
-                { name: 'Google', icon: 'google' },
-                { name: 'Adobe', icon: 'adobe' },
-                { name: 'Spotify', icon: 'spotify' },
-                { name: 'Airbnb', icon: 'airbnb' },
-                { name: 'Netflix', icon: 'netflix' },
-                { name: 'Slack', icon: 'slack' },
+                { name: 'Google', src: googleLogo, isLocal: true },
+                { name: 'Adobe', src: adobeLogo, isLocal: true },
+                { name: 'Spotify', icon: 'spotify', isLocal: false },
+                { name: 'Airbnb', icon: 'airbnb', isLocal: false },
+                { name: 'Netflix', icon: 'netflix', isLocal: false },
+                { name: 'Slack', src: slackLogo, isLocal: true },
               ].map((company) => (
                 <li
                   key={company.name}
@@ -313,9 +316,9 @@ const Stats = () => {
                   title={company.name}
                 >
                   <img
-                    src={`https://cdn.simpleicons.org/${company.icon}/currentColor`}
+                    src={company.isLocal ? company.src : `https://cdn.simpleicons.org/${company.icon}/currentColor`}
                     alt={`${company.name} logo`}
-                    className="h-8 md:h-10 w-auto opacity-50 group-hover:opacity-100 dark:invert transition-opacity duration-300"
+                    className={`h-8 md:h-10 w-auto opacity-70 group-hover:opacity-100 transition-opacity duration-300 ${!company.isLocal ? 'dark:invert' : ''}`}
                   />
                 </li>
               ))}

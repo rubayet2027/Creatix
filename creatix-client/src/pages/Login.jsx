@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { HiMail, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
+import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiPlay } from 'react-icons/hi';
 import { FcGoogle } from 'react-icons/fc';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -22,7 +23,6 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (error) {
       // Error is handled in AuthContext with toast
-      console.error('Login failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -34,9 +34,21 @@ const Login = () => {
       await loginWithGoogle();
       navigate(from, { replace: true });
     } catch (error) {
-      console.error('Google login failed:', error);
+      // Error is handled in AuthContext with toast
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setIsDemoLoading(true);
+    try {
+      await login('demo@creatix.com', 'Demo@1234');
+      navigate(from, { replace: true });
+    } catch (error) {
+      // Error is handled in AuthContext with toast
+    } finally {
+      setIsDemoLoading(false);
     }
   };
 
@@ -61,11 +73,31 @@ const Login = () => {
             </p>
           </div>
 
+          {/* Demo Login */}
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={isLoading || isDemoLoading}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+          >
+            {isDemoLoading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              <>
+                <HiPlay className="w-5 h-5" />
+                Try Demo Account
+              </>
+            )}
+          </button>
+
           {/* Google Sign In */}
           <button
             type="button"
             onClick={handleGoogleLogin}
-            disabled={isLoading}
+            disabled={isLoading || isDemoLoading}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-6"
           >
             <FcGoogle className="w-5 h-5" />
@@ -75,7 +107,7 @@ const Login = () => {
           {/* Divider */}
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-1 h-px bg-[var(--border-color)]" />
-            <span className="text-sm text-[var(--text-muted)]">or</span>
+            <span className="text-sm text-[var(--text-muted)]">or sign in with email</span>
             <div className="flex-1 h-px bg-[var(--border-color)]" />
           </div>
 
@@ -148,7 +180,7 @@ const Login = () => {
             {/* Submit */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isDemoLoading}
               className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (

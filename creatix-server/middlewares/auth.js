@@ -1,6 +1,7 @@
 import { auth } from '../config/firebase.js';
 import User from '../models/User.js';
 import { ADMIN_EMAIL } from '../utils/constants.js';
+import { logger } from '../utils/logger.js';
 
 // Verify Firebase ID token and attach user to request
 export const verifyToken = async (req, res, next) => {
@@ -8,24 +9,20 @@ export const verifyToken = async (req, res, next) => {
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('❌ No auth header or invalid format');
             return res.status(401).json({ message: 'No token provided' });
         }
 
         const token = authHeader.split(' ')[1];
-        console.log('🔍 Verifying token (first 20 chars):', token.substring(0, 20) + '...');
 
         // Verify Firebase ID token
         let decodedToken;
         try {
             decodedToken = await auth.verifyIdToken(token);
-            console.log('✅ Token verified for:', decodedToken.email);
         } catch (verifyError) {
-            console.error('❌ Token verification failed:', verifyError.message);
-            console.error('Error code:', verifyError.code);
-            return res.status(401).json({ 
+            logger.warn('Token verification failed:', verifyError.code || verifyError.message);
+            return res.status(401).json({
                 message: 'Invalid or expired token',
-                error: verifyError.code || verifyError.message 
+                error: verifyError.code || verifyError.message
             });
         }
 
@@ -35,7 +32,7 @@ export const verifyToken = async (req, res, next) => {
         if (!user) {
             // Determine if this is the hardcoded admin
             const isHardcodedAdmin = decodedToken.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            
+
             // Auto-create user if doesn't exist
             user = await User.create({
                 email: decodedToken.email,
@@ -45,16 +42,13 @@ export const verifyToken = async (req, res, next) => {
                 // Only grant admin role to the hardcoded admin email
                 role: isHardcodedAdmin ? 'admin' : 'user',
             });
-            console.log('✅ Created new user:', user.email);
-        } else {
-            console.log('✅ Found existing user:', user.email);
         }
 
         // Attach fresh user data to request
         req.user = user;
         next();
     } catch (error) {
-        console.error('Token verification error:', error);
+        logger.error('Token verification error:', error.message);
         return res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
@@ -71,15 +65,15 @@ export const verifyRole = (...allowedRoles) => {
         // SPECIAL CHECK: If admin role is required, verify it's the hardcoded admin
         if (allowedRoles.includes('admin')) {
             const isHardcodedAdmin = req.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            
+
             // If user claims to be admin but isn't the hardcoded admin, deny access
             if (req.user.role === 'admin' && !isHardcodedAdmin) {
                 // Demote this user - they shouldn't be admin
-                return res.status(403).json({ 
+                return res.status(403).json({
                     message: 'Access denied. You are not the system administrator.',
                 });
             }
-            
+
             // If hardcoded admin, allow access
             if (isHardcodedAdmin && req.user.role === 'admin') {
                 return next();
@@ -88,7 +82,7 @@ export const verifyRole = (...allowedRoles) => {
 
         // Check if user's role is in the allowed roles
         if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 message: 'Access denied. Insufficient permissions.',
                 requiredRole: allowedRoles,
                 yourRole: req.user.role
@@ -104,11 +98,11 @@ export const isAdmin = (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({ message: 'Authentication required' });
     }
-    
+
     const isHardcodedAdmin = req.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-    
+
     if (req.user.role !== 'admin' || !isHardcodedAdmin) {
-        return res.status(403).json({ 
+        return res.status(403).json({
             message: 'Admin access required. Only the system administrator can access this.',
         });
     }

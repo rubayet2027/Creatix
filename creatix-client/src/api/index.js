@@ -69,4 +69,11 @@ export const statsAPI = {
     getAdmin: () => api.get('/stats/admin'),
 };
 
+// Contact API
+export const contactAPI = {
+    submit: (data) => api.post('/contact', data),
+    getAll: (params) => api.get('/contact', { params }),
+    updateStatus: (id, status) => api.patch(`/contact/${id}/status`, { status }),
+};
+
 export default api;

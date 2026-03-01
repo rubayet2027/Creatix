@@ -1,34 +1,49 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { PrivateRoute, CreatorRoute, AdminRoute, PublicOnlyRoute } from '../components/PrivateRoute';
 import { HomeRoute } from '../components/HomeRoute';
+import Loader from '../components/Loader';
 
-// Public Pages
+// Eagerly loaded (critical path)
 import Home from '../pages/Home';
-import AllContests from '../pages/AllContests';
-import ContestDetails from '../pages/ContestDetails';
-import Leaderboard from '../pages/Leaderboard';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
-import NotFound from '../pages/NotFound';
-import About from '../pages/About';
-import Contact from '../pages/Contact';
 
-// Dashboard Pages
-import {
-  DashboardHome,
-  MyParticipatedContests,
-  MyWinningContests,
-  MyProfile,
-  AddContest,
-  MyCreatedContests,
-  ContestSubmissions,
-  EditContest,
-  ManageUsers,
-  ManageContests,
-  ApplyAsCreator,
-} from '../pages/dashboard';
+// Lazy loaded (code splitting)
+const AllContests = lazy(() => import('../pages/AllContests'));
+const ContestDetails = lazy(() => import('../pages/ContestDetails'));
+const Leaderboard = lazy(() => import('../pages/Leaderboard'));
+const NotFound = lazy(() => import('../pages/NotFound'));
+const About = lazy(() => import('../pages/About'));
+const Contact = lazy(() => import('../pages/Contact'));
+const Blog = lazy(() => import('../pages/Blog'));
+const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
+const Terms = lazy(() => import('../pages/Terms'));
+
+// Dashboard Pages (lazy loaded)
+const DashboardHome = lazy(() => import('../pages/dashboard/DashboardHome'));
+const MyParticipatedContests = lazy(() => import('../pages/dashboard/MyParticipatedContests'));
+const MyWinningContests = lazy(() => import('../pages/dashboard/MyWinningContests'));
+const MyProfile = lazy(() => import('../pages/dashboard/MyProfile'));
+const AddContest = lazy(() => import('../pages/dashboard/AddContest'));
+const MyCreatedContests = lazy(() => import('../pages/dashboard/MyCreatedContests'));
+const ContestSubmissions = lazy(() => import('../pages/dashboard/ContestSubmissions'));
+const EditContest = lazy(() => import('../pages/dashboard/EditContest'));
+const ManageUsers = lazy(() => import('../pages/dashboard/ManageUsers'));
+const ManageContests = lazy(() => import('../pages/dashboard/ManageContests'));
+const ApplyAsCreator = lazy(() => import('../pages/dashboard/ApplyAsCreator'));
+const AdminReports = lazy(() => import('../pages/dashboard/AdminReports'));
+const AdminCategories = lazy(() => import('../pages/dashboard/AdminCategories'));
+const AdminSettings = lazy(() => import('../pages/dashboard/AdminSettings'));
+
+// Suspense wrapper for lazy components
+const LazyPage = ({ children }) => (
+  <Suspense fallback={<Loader />}>
+    {children}
+  </Suspense>
+);
 
 const router = createBrowserRouter([
   {
@@ -45,19 +60,15 @@ const router = createBrowserRouter([
       },
       {
         path: 'all-contests',
-        element: <AllContests />,
+        element: <LazyPage><AllContests /></LazyPage>,
       },
       {
         path: 'contest/:id',
-        element: (
-          <PrivateRoute>
-            <ContestDetails />
-          </PrivateRoute>
-        ),
+        element: <LazyPage><ContestDetails /></LazyPage>,
       },
       {
         path: 'leaderboard',
-        element: <Leaderboard />,
+        element: <LazyPage><Leaderboard /></LazyPage>,
       },
       {
         path: 'login',
@@ -77,11 +88,23 @@ const router = createBrowserRouter([
       },
       {
         path: 'about',
-        element: <About />,
+        element: <LazyPage><About /></LazyPage>,
       },
       {
         path: 'contact',
-        element: <Contact />,
+        element: <LazyPage><Contact /></LazyPage>,
+      },
+      {
+        path: 'blog',
+        element: <LazyPage><Blog /></LazyPage>,
+      },
+      {
+        path: 'privacy-policy',
+        element: <LazyPage><PrivacyPolicy /></LazyPage>,
+      },
+      {
+        path: 'terms',
+        element: <LazyPage><Terms /></LazyPage>,
       },
     ],
   },
@@ -96,30 +119,30 @@ const router = createBrowserRouter([
       // User Dashboard Routes
       {
         index: true,
-        element: <DashboardHome />,
+        element: <LazyPage><DashboardHome /></LazyPage>,
       },
       {
         path: 'participated',
-        element: <MyParticipatedContests />,
+        element: <LazyPage><MyParticipatedContests /></LazyPage>,
       },
       {
         path: 'winning',
-        element: <MyWinningContests />,
+        element: <LazyPage><MyWinningContests /></LazyPage>,
       },
       {
         path: 'profile',
-        element: <MyProfile />,
+        element: <LazyPage><MyProfile /></LazyPage>,
       },
       {
         path: 'apply-creator',
-        element: <ApplyAsCreator />,
+        element: <LazyPage><ApplyAsCreator /></LazyPage>,
       },
       // Creator Dashboard Routes
       {
         path: 'add-contest',
         element: (
           <CreatorRoute>
-            <AddContest />
+            <LazyPage><AddContest /></LazyPage>
           </CreatorRoute>
         ),
       },
@@ -127,7 +150,7 @@ const router = createBrowserRouter([
         path: 'my-contests',
         element: (
           <CreatorRoute>
-            <MyCreatedContests />
+            <LazyPage><MyCreatedContests /></LazyPage>
           </CreatorRoute>
         ),
       },
@@ -135,7 +158,7 @@ const router = createBrowserRouter([
         path: 'submissions/:id',
         element: (
           <CreatorRoute>
-            <ContestSubmissions />
+            <LazyPage><ContestSubmissions /></LazyPage>
           </CreatorRoute>
         ),
       },
@@ -143,7 +166,7 @@ const router = createBrowserRouter([
         path: 'edit-contest/:id',
         element: (
           <CreatorRoute>
-            <EditContest />
+            <LazyPage><EditContest /></LazyPage>
           </CreatorRoute>
         ),
       },
@@ -152,7 +175,7 @@ const router = createBrowserRouter([
         path: 'manage-users',
         element: (
           <AdminRoute>
-            <ManageUsers />
+            <LazyPage><ManageUsers /></LazyPage>
           </AdminRoute>
         ),
       },
@@ -160,7 +183,31 @@ const router = createBrowserRouter([
         path: 'manage-contests',
         element: (
           <AdminRoute>
-            <ManageContests />
+            <LazyPage><ManageContests /></LazyPage>
+          </AdminRoute>
+        ),
+      },
+      {
+        path: 'reports',
+        element: (
+          <AdminRoute>
+            <LazyPage><AdminReports /></LazyPage>
+          </AdminRoute>
+        ),
+      },
+      {
+        path: 'categories',
+        element: (
+          <AdminRoute>
+            <LazyPage><AdminCategories /></LazyPage>
+          </AdminRoute>
+        ),
+      },
+      {
+        path: 'settings',
+        element: (
+          <AdminRoute>
+            <LazyPage><AdminSettings /></LazyPage>
           </AdminRoute>
         ),
       },
@@ -168,7 +215,7 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <NotFound />,
+    element: <LazyPage><NotFound /></LazyPage>,
   },
 ]);
 

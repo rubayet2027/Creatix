@@ -15,7 +15,9 @@ import {
     HiBadgeCheck,
     HiMenu,
     HiX,
-    HiChevronRight
+    HiChevronRight,
+    HiChartBar,
+    HiTag
 } from 'react-icons/hi';
 import Container from '../components/layout/Container';
 import Navbar from '../components/Navbar';
@@ -63,10 +65,13 @@ const DashboardLayout = () => {
         { to: '/dashboard/my-contests', icon: HiClipboardList, label: 'My Contests' },
     ];
 
-    // Admin navigation items
+    // Admin navigation items (6 total)
     const adminNavItems = [
         { to: '/dashboard/manage-users', icon: HiUserGroup, label: 'Manage Users' },
-        { to: '/dashboard/manage-contests', icon: HiCog, label: 'Manage Contests' },
+        { to: '/dashboard/manage-contests', icon: HiClipboardList, label: 'Manage Contests' },
+        { to: '/dashboard/reports', icon: HiChartBar, label: 'Reports' },
+        { to: '/dashboard/categories', icon: HiTag, label: 'Categories' },
+        { to: '/dashboard/settings', icon: HiCog, label: 'Settings' },
     ];
 
     const NavItem = ({ to, icon: Icon, label, end }) => (
@@ -138,23 +143,21 @@ const DashboardLayout = () => {
                     </div>
 
                     {/* Mobile Navigation Drawer - Slide from Left */}
-                    <div 
-                        className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${
-                            mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                        }`}
+                    <div
+                        className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                            }`}
                     >
                         {/* Backdrop */}
-                        <div 
+                        <div
                             className="absolute inset-0 bg-black/50"
                             onClick={() => setMobileMenuOpen(false)}
                         />
-                        
+
                         {/* Drawer */}
-                        <div 
+                        <div
                             ref={mobileMenuRef}
-                            className={`absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[var(--bg-secondary)] shadow-2xl transform transition-transform duration-300 ease-out ${
-                                mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                            }`}
+                            className={`absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[var(--bg-secondary)] shadow-2xl transform transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                                }`}
                         >
                             {/* Drawer Header */}
                             <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
@@ -205,10 +208,10 @@ const DashboardLayout = () => {
                                         <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3 px-2">
                                             Become a Creator
                                         </p>
-                                        <MobileNavItem 
-                                            to="/dashboard/apply-creator" 
-                                            icon={HiBadgeCheck} 
-                                            label="Apply as Creator" 
+                                        <MobileNavItem
+                                            to="/dashboard/apply-creator"
+                                            icon={HiBadgeCheck}
+                                            label="Apply as Creator"
                                         />
                                     </>
                                 )}
@@ -252,95 +255,95 @@ const DashboardLayout = () => {
                     </div>
 
                     <div className="flex gap-8 py-8">
-                    {/* Sidebar */}
-                    <aside className="hidden lg:block w-64 shrink-0">
-                        <div className="sticky top-24 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-6">
-                            {/* User Info */}
-                            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[var(--border-color)]">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-lg">
-                                    {dbUser?.name?.charAt(0) || 'U'}
+                        {/* Sidebar */}
+                        <aside className="hidden lg:block w-64 shrink-0">
+                            <div className="sticky top-24 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] p-6">
+                                {/* User Info */}
+                                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[var(--border-color)]">
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-lg">
+                                        {dbUser?.name?.charAt(0) || 'U'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-[var(--text-primary)] truncate">
+                                            {dbUser?.name || 'User'}
+                                        </p>
+                                        <p className="text-sm text-[var(--text-secondary)] capitalize">
+                                            {dbUser?.role || 'user'}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-[var(--text-primary)] truncate">
-                                        {dbUser?.name || 'User'}
+
+                                {/* Navigation */}
+                                <nav className="space-y-2">
+                                    <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
+                                        Dashboard
                                     </p>
-                                    <p className="text-sm text-[var(--text-secondary)] capitalize">
-                                        {dbUser?.role || 'user'}
-                                    </p>
-                                </div>
+                                    {userNavItems.map((item) => (
+                                        <NavItem key={item.to} {...item} />
+                                    ))}
+
+                                    {isCreator && (
+                                        <>
+                                            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3">
+                                                Creator
+                                            </p>
+                                            {creatorNavItems.map((item) => (
+                                                <NavItem key={item.to} {...item} />
+                                            ))}
+                                        </>
+                                    )}
+
+                                    {!isCreator && !isAdmin && (
+                                        <>
+                                            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3">
+                                                Become a Creator
+                                            </p>
+                                            <NavItem
+                                                to="/dashboard/apply-creator"
+                                                icon={HiBadgeCheck}
+                                                label="Apply as Creator"
+                                            />
+                                        </>
+                                    )}
+
+                                    {isAdmin && (
+                                        <>
+                                            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3">
+                                                Admin
+                                            </p>
+                                            {adminNavItems.map((item) => (
+                                                <NavItem key={item.to} {...item} />
+                                            ))}
+                                        </>
+                                    )}
+
+                                    {/* Actions */}
+                                    <div className="pt-6 mt-6 border-t border-[var(--border-color)] space-y-2">
+                                        <NavLink
+                                            to="/"
+                                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
+                                        >
+                                            <HiArrowLeft className="w-5 h-5" />
+                                            <span className="font-medium">Back to Home</span>
+                                        </NavLink>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                        >
+                                            <HiLogout className="w-5 h-5" />
+                                            <span className="font-medium">Logout</span>
+                                        </button>
+                                    </div>
+                                </nav>
                             </div>
+                        </aside>
 
-                            {/* Navigation */}
-                            <nav className="space-y-2">
-                                <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
-                                    Dashboard
-                                </p>
-                                {userNavItems.map((item) => (
-                                    <NavItem key={item.to} {...item} />
-                                ))}
-
-                                {isCreator && (
-                                    <>
-                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3">
-                                            Creator
-                                        </p>
-                                        {creatorNavItems.map((item) => (
-                                            <NavItem key={item.to} {...item} />
-                                        ))}
-                                    </>
-                                )}
-
-                                {!isCreator && !isAdmin && (
-                                    <>
-                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3">
-                                            Become a Creator
-                                        </p>
-                                        <NavItem 
-                                            to="/dashboard/apply-creator" 
-                                            icon={HiBadgeCheck} 
-                                            label="Apply as Creator" 
-                                        />
-                                    </>
-                                )}
-
-                                {isAdmin && (
-                                    <>
-                                        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mt-6 mb-3">
-                                            Admin
-                                        </p>
-                                        {adminNavItems.map((item) => (
-                                            <NavItem key={item.to} {...item} />
-                                        ))}
-                                    </>
-                                )}
-
-                                {/* Actions */}
-                                <div className="pt-6 mt-6 border-t border-[var(--border-color)] space-y-2">
-                                    <NavLink
-                                        to="/"
-                                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-all"
-                                    >
-                                        <HiArrowLeft className="w-5 h-5" />
-                                        <span className="font-medium">Back to Home</span>
-                                    </NavLink>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-                                    >
-                                        <HiLogout className="w-5 h-5" />
-                                        <span className="font-medium">Logout</span>
-                                    </button>
-                                </div>
-                            </nav>
-                        </div>
-                    </aside>
-
-                    {/* Main Content */}
-                    <main className="flex-1 min-w-0">
-                        <Outlet />
-                    </main>
-                </div>
-            </Container>
+                        {/* Main Content */}
+                        <main className="flex-1 min-w-0">
+                            <Outlet />
+                        </main>
+                    </div>
+                </Container>
             </div>
             <Footer />
         </div>

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { HiMail, HiPhone, HiLocationMarker, HiPaperAirplane } from 'react-icons/hi';
 import Container from '../components/layout/Container';
 import Section from '../components/layout/Section';
+import { contactAPI } from '../api';
 import toast from 'react-hot-toast';
 
 const Contact = () => {
@@ -11,11 +12,15 @@ const Contact = () => {
 
     const onSubmit = async (data) => {
         setIsSubmitting(true);
-        // Simulate sending
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        toast.success('Message sent successfully! We\'ll get back to you soon.');
-        reset();
-        setIsSubmitting(false);
+        try {
+            const response = await contactAPI.submit(data);
+            toast.success(response.data.message || 'Message sent successfully!');
+            reset();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const contactInfo = [

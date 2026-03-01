@@ -1,19 +1,20 @@
 import express from 'express';
 import Contest from '../models/Contest.js';
 import { verifyToken, isAdmin, isCreator } from '../middlewares/auth.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
 // Get all approved contests (public)
 router.get('/', async (req, res) => {
     try {
-        const { type, search, timeline, page = 1, limit = 10 } = req.query;
+        const { type, search, timeline, sort, page = 1, limit = 10 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const now = new Date();
 
         // For past contests, include 'completed' status; for others, only 'approved'
         let filter = {};
-        
+
         if (timeline === 'past') {
             filter.$or = [
                 { status: 'completed' },
@@ -56,12 +57,24 @@ router.get('/', async (req, res) => {
             filter = { $and: [filter, searchFilter] };
         }
 
+        // Build sort option
+        let sortOption = {};
+        switch (sort) {
+            case 'newest': sortOption = { createdAt: -1 }; break;
+            case 'oldest': sortOption = { createdAt: 1 }; break;
+            case 'prize-high': sortOption = { prizeMoney: -1 }; break;
+            case 'prize-low': sortOption = { prizeMoney: 1 }; break;
+            case 'popular': sortOption = { participantsCount: -1 }; break;
+            case 'deadline': sortOption = { deadline: 1 }; break;
+            default: sortOption = { deadline: timeline === 'past' ? -1 : 1 };
+        }
+
         const contests = await Contest.find(filter)
             .populate('creator', 'name photo')
             .populate('winners.user', 'name photo')
             .skip(skip)
             .limit(parseInt(limit))
-            .sort({ deadline: timeline === 'past' ? -1 : 1 });
+            .sort(sortOption);
 
         const total = await Contest.countDocuments(filter);
 
@@ -75,7 +88,7 @@ router.get('/', async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('Get contests error:', error);
+        logger.error('Get contests error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -147,7 +160,7 @@ router.get('/by-timeline', async (req, res) => {
             upcoming: { contests: upcomingContests, total: upcomingCount },
         });
     } catch (error) {
-        console.error('Get contests by timeline error:', error);
+        logger.error('Get contests by timeline error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -165,7 +178,7 @@ router.get('/popular', async (req, res) => {
 
         res.json(contests);
     } catch (error) {
-        console.error('Get popular contests error:', error);
+        logger.error('Get popular contests error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -229,7 +242,7 @@ router.get('/creator/:userId', async (req, res) => {
             data: contests,
         });
     } catch (error) {
-        console.error('Get creator contests error:', error);
+        logger.error('Get creator contests error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -263,7 +276,7 @@ router.get('/admin/all', verifyToken, isAdmin, async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('Get admin contests error:', error);
+        logger.error('Get admin contests error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -277,7 +290,7 @@ router.get('/my-contests', verifyToken, isCreator, async (req, res) => {
 
         res.json(contests);
     } catch (error) {
-        console.error('Get my contests error:', error);
+        logger.error('Get my contests error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -350,7 +363,7 @@ router.get('/:id/leaderboard', async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('Get contest leaderboard error:', error);
+        logger.error('Get contest leaderboard error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -369,7 +382,7 @@ router.get('/:id', async (req, res) => {
 
         res.json(contest);
     } catch (error) {
-        console.error('Get contest error:', error);
+        logger.error('Get contest error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -403,7 +416,7 @@ router.post('/', verifyToken, isCreator, async (req, res) => {
 
         res.status(201).json(contest);
     } catch (error) {
-        console.error('Create contest error:', error);
+        logger.error('Create contest error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -444,7 +457,7 @@ router.patch('/:id', verifyToken, async (req, res) => {
 
         res.json(updatedContest);
     } catch (error) {
-        console.error('Update contest error:', error);
+        logger.error('Update contest error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -470,7 +483,7 @@ router.patch('/:id/status', verifyToken, isAdmin, async (req, res) => {
 
         res.json(contest);
     } catch (error) {
-        console.error('Update status error:', error);
+        logger.error('Update status error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -497,7 +510,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
         await Contest.findByIdAndDelete(req.params.id);
         res.json({ message: 'Contest deleted successfully' });
     } catch (error) {
-        console.error('Delete contest error:', error);
+        logger.error('Delete contest error:', error.message);
         res.status(500).json({ message: 'Server error' });
     }
 });

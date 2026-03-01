@@ -15,6 +15,7 @@ import paymentRoutes from './routes/payments.js';
 import participationRoutes from './routes/participations.js';
 import leaderboardRoutes from './routes/leaderboard.js';
 import statsRoutes from './routes/stats.js';
+import contactRoutes from './routes/contact.js';
 
 // Load environment variables
 dotenv.config();
@@ -61,7 +62,7 @@ app.use(cors({
         if (!origin) {
             return callback(null, true);
         }
-        
+
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
@@ -140,6 +141,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/participations', participationRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -153,15 +155,15 @@ if (process.env.NODE_ENV === 'development') {
         try {
             const { getAuth } = await import('./config/firebase.js');
             const auth = getAuth();
-            res.json({ 
-                status: 'ok', 
+            res.json({
+                status: 'ok',
                 message: 'Firebase Admin SDK initialized',
                 hasAuth: !!auth,
                 hasVerifyIdToken: typeof auth?.verifyIdToken === 'function'
             });
         } catch (error) {
-            res.status(500).json({ 
-                status: 'error', 
+            res.status(500).json({
+                status: 'error',
                 message: error.message
             });
         }
@@ -173,21 +175,21 @@ if (process.env.NODE_ENV === 'development') {
             if (!authHeader || !authHeader.startsWith('Bearer ')) {
                 return res.status(400).json({ message: 'No token provided' });
             }
-            
+
             const token = authHeader.split(' ')[1];
             const { auth } = await import('./config/firebase.js');
             const decoded = await auth.verifyIdToken(token);
-            
-            res.json({ 
+
+            res.json({
                 status: 'ok',
                 email: decoded.email,
                 uid: decoded.uid
             });
         } catch (error) {
-            res.status(401).json({ 
-                status: 'error', 
+            res.status(401).json({
+                status: 'error',
                 code: error.code,
-                message: error.message 
+                message: error.message
             });
         }
     });

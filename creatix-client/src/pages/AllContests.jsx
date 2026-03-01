@@ -5,7 +5,7 @@ import { contestsAPI } from '../api';
 import ContestCard from '../components/ContestCard';
 import Container from '../components/layout/Container';
 import Section from '../components/layout/Section';
-import { HiSearch, HiFilter, HiClock, HiPlay, HiCalendar, HiCheckCircle } from 'react-icons/hi';
+import { HiSearch, HiFilter, HiClock, HiPlay, HiCalendar, HiCheckCircle, HiSortDescending } from 'react-icons/hi';
 import { HiTrophy } from 'react-icons/hi2';
 
 const CONTEST_TYPES = [
@@ -42,8 +42,18 @@ const AllContests = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [activeType, setActiveType] = useState(searchParams.get('type') || 'All');
   const [activeTimeline, setActiveTimeline] = useState(searchParams.get('timeline') || 'all');
+  const [activeSort, setActiveSort] = useState(searchParams.get('sort') || 'newest');
   const [page, setPage] = useState(1);
   const limit = 9;
+
+  const SORT_OPTIONS = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'prize-high', label: 'Highest Prize' },
+    { value: 'prize-low', label: 'Lowest Prize' },
+    { value: 'popular', label: 'Most Popular' },
+    { value: 'deadline', label: 'Ending Soon' },
+  ];
 
   // Query for timeline sections (overview)
   const { data: timelineData, isLoading: isTimelineLoading } = useQuery({
@@ -57,12 +67,13 @@ const AllContests = () => {
 
   // Query for filtered contests
   const { data: filteredData, isLoading: isFilteredLoading } = useQuery({
-    queryKey: ['contests', activeType, activeTimeline, searchParams.get('search'), page],
+    queryKey: ['contests', activeType, activeTimeline, activeSort, searchParams.get('search'), page],
     queryFn: async () => {
       const params = {
         type: activeType === 'All' ? undefined : activeType,
         timeline: activeTimeline === 'all' ? undefined : activeTimeline,
         search: searchParams.get('search') || undefined,
+        sort: activeSort,
         page,
         limit,
       };
@@ -108,22 +119,20 @@ const AllContests = () => {
   // Helper to render a contest section
   const renderSection = (title, icon, contests, total, timeline, description) => {
     if (!contests || contests.length === 0) return null;
-    
+
     const Icon = icon;
     return (
       <div className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${
-              timeline === 'ongoing' ? 'bg-emerald-500/10' :
-              timeline === 'upcoming' ? 'bg-blue-500/10' :
-              'bg-[var(--bg-tertiary)]'
-            }`}>
-              <Icon className={`w-5 h-5 ${
-                timeline === 'ongoing' ? 'text-emerald-500' :
-                timeline === 'upcoming' ? 'text-blue-500' :
-                'text-[var(--text-muted)]'
-              }`} />
+            <div className={`p-2 rounded-lg ${timeline === 'ongoing' ? 'bg-emerald-500/10' :
+                timeline === 'upcoming' ? 'bg-blue-500/10' :
+                  'bg-[var(--bg-tertiary)]'
+              }`}>
+              <Icon className={`w-5 h-5 ${timeline === 'ongoing' ? 'text-emerald-500' :
+                  timeline === 'upcoming' ? 'text-blue-500' :
+                    'text-[var(--text-muted)]'
+                }`} />
             </div>
             <div>
               <h2 className="text-xl font-bold text-[var(--text-primary)]">{title}</h2>
@@ -193,11 +202,10 @@ const AllContests = () => {
                 <button
                   key={tab.id}
                   onClick={() => handleTimelineChange(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeTimeline === tab.id
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTimeline === tab.id
                       ? 'bg-primary-600 text-white'
                       : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
@@ -213,16 +221,31 @@ const AllContests = () => {
               <button
                 key={type}
                 onClick={() => handleTypeChange(type)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeType === type
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${activeType === type
                     ? 'bg-secondary-600 text-white'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
-                }`}
+                  }`}
               >
                 {type}
               </button>
             ))}
           </div>
+
+          {/* Sort Dropdown */}
+          {(activeTimeline !== 'all' || searchParams.get('search')) && (
+            <div className="flex items-center gap-3 mb-6">
+              <HiSortDescending className="w-5 h-5 text-[var(--text-secondary)]" />
+              <select
+                value={activeSort}
+                onChange={(e) => { setActiveSort(e.target.value); setPage(1); }}
+                className="px-4 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Results */}
           {isLoading ? (
@@ -256,17 +279,17 @@ const AllContests = () => {
                 'past',
                 'Completed contests with winners announced'
               )}
-              {(!timelineData.ongoing?.contests?.length && 
-                !timelineData.upcoming?.contests?.length && 
+              {(!timelineData.ongoing?.contests?.length &&
+                !timelineData.upcoming?.contests?.length &&
                 !timelineData.past?.contests?.length) && (
-                <div className="text-center py-20">
-                  <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <HiSearch className="w-8 h-8 text-primary-500" />
+                  <div className="text-center py-20">
+                    <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <HiSearch className="w-8 h-8 text-primary-500" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Contests Found</h2>
+                    <p className="text-[var(--text-secondary)]">No contests available yet. Check back soon!</p>
                   </div>
-                  <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No Contests Found</h2>
-                  <p className="text-[var(--text-secondary)]">No contests available yet. Check back soon!</p>
-                </div>
-              )}
+                )}
             </>
           ) : filteredData?.contests?.length === 0 ? (
             <div className="text-center py-20">
@@ -294,7 +317,7 @@ const AllContests = () => {
                   <ContestCard key={contest._id} contest={contest} showWinners={activeTimeline === 'past'} />
                 ))}
               </div>
-              
+
               {/* Pagination Controls */}
               {(filteredData?.pagination?.totalPages || 1) > 1 && (
                 <div className="flex items-center justify-center gap-4 mt-10">

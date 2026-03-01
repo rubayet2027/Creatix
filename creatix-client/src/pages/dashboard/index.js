@@ -9,3 +9,7 @@ export { default as EditContest } from './EditContest';
 export { default as ManageUsers } from './ManageUsers';
 export { default as ManageContests } from './ManageContests';
 export { default as ApplyAsCreator } from './ApplyAsCreator';
+export { default as AdminReports } from './AdminReports';
+export { default as AdminCategories } from './AdminCategories';
+export { default as AdminSettings } from './AdminSettings';
+

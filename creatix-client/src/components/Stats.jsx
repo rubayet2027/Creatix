@@ -284,13 +284,13 @@ const Stats = () => {
 
           {/* Companies Section */}
           <div className="flex-1 w-full">
-            <div className="text-center lg:text-left mb-6">
-              <p className="text-[var(--text-secondary)] font-medium">
+            <div className="text-center mb-8">
+              <p className="text-[var(--text-secondary)] font-medium text-lg">
                 Trusted by creators from top companies
               </p>
             </div>
             <ul
-              className="flex flex-wrap justify-center lg:justify-start items-center gap-8 lg:gap-12"
+              className="flex flex-wrap justify-center items-center gap-10 md:gap-14"
               aria-label="Trusted companies"
             >
               {[
@@ -303,13 +303,13 @@ const Stats = () => {
               ].map((company) => (
                 <li
                   key={company.name}
-                  className="group flex flex-col items-center justify-center transition-transform hover:scale-110"
+                  className="group flex flex-col items-center justify-center transition-all duration-300 hover:scale-[1.15] active:scale-95 cursor-pointer"
                   title={company.name}
                 >
                   <img
                     src={company.isLocal ? company.src : `https://cdn.simpleicons.org/${company.icon}/currentColor`}
                     alt={`${company.name} logo`}
-                    className={`h-8 md:h-10 w-auto opacity-70 group-hover:opacity-100 transition-opacity duration-300 ${!company.isLocal ? 'dark:invert' : ''}`}
+                    className={`h-10 md:h-12 lg:h-14 w-auto drop-shadow-sm ${!company.isLocal ? 'dark:invert text-[var(--text-primary)]' : ''}`}
                   />
                 </li>
               ))}
